@@ -9,7 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
-using Store_chain.Data;
+using Store_chain.Model;
 
 namespace Store_chain
 {
@@ -27,7 +27,7 @@ namespace Store_chain
         {
             services.AddControllersWithViews();
 
-            services.AddDbContext<Store_chainContext>(options =>
+            services.AddDbContext<StoreChainContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("Store_chainContext")));
         }
 

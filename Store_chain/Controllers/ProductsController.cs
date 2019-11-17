@@ -5,16 +5,15 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-using Store_chain.Data;
-using Store_chain.Models;
+using Store_chain.Model;
 
 namespace Store_chain.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly Store_chainContext _context;
+        private readonly StoreChainContext _context;
 
-        public ProductsController(Store_chainContext context)
+        public ProductsController(StoreChainContext context)
         {
             _context = context;
         }
@@ -22,7 +21,7 @@ namespace Store_chain.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Product.ToListAsync());
+            return View(await _context.Products.ToListAsync());
         }
 
         // GET: Products/Details/5
@@ -33,14 +32,14 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Product
-                .FirstOrDefaultAsync(m => m.ProductId == id);
-            if (product == null)
+            var products = await _context.Products
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (products == null)
             {
                 return NotFound();
             }
 
-            return View(product);
+            return View(products);
         }
 
         // GET: Products/Create
@@ -54,15 +53,15 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("ProductId,SupplierId,category,department")] Product product)
+        public async Task<IActionResult> Create([Bind("Id,SupplierKey,Category,Department,Description,IsDisplay")] Products products)
         {
             if (ModelState.IsValid)
             {
-                _context.Add(product);
+                _context.Add(products);
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(products);
         }
 
         // GET: Products/Edit/5
@@ -73,12 +72,12 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Product.FindAsync(id);
-            if (product == null)
+            var products = await _context.Products.FindAsync(id);
+            if (products == null)
             {
                 return NotFound();
             }
-            return View(product);
+            return View(products);
         }
 
         // POST: Products/Edit/5
@@ -86,9 +85,9 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("ProductId,SupplierId,category,department")] Product product)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,SupplierKey,Category,Department,Description,IsDisplay")] Products products)
         {
-            if (id != product.ProductId)
+            if (id != products.Id)
             {
                 return NotFound();
             }
@@ -97,12 +96,12 @@ namespace Store_chain.Controllers
             {
                 try
                 {
-                    _context.Update(product);
+                    _context.Update(products);
                     await _context.SaveChangesAsync();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductExists(product.ProductId))
+                    if (!ProductsExists(products.Id))
                     {
                         return NotFound();
                     }
@@ -113,7 +112,7 @@ namespace Store_chain.Controllers
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(product);
+            return View(products);
         }
 
         // GET: Products/Delete/5
@@ -124,14 +123,14 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var product = await _context.Product
-                .FirstOrDefaultAsync(m => m.ProductId == id);
-            if (product == null)
+            var products = await _context.Products
+                .FirstOrDefaultAsync(m => m.Id == id);
+            if (products == null)
             {
                 return NotFound();
             }
 
-            return View(product);
+            return View(products);
         }
 
         // POST: Products/Delete/5
@@ -139,15 +138,15 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var product = await _context.Product.FindAsync(id);
-            _context.Product.Remove(product);
+            var products = await _context.Products.FindAsync(id);
+            _context.Products.Remove(products);
             await _context.SaveChangesAsync();
             return RedirectToAction(nameof(Index));
         }
 
-        private bool ProductExists(int id)
+        private bool ProductsExists(int id)
         {
-            return _context.Product.Any(e => e.ProductId == id);
+            return _context.Products.Any(e => e.Id == id);
         }
     }
 }

@@ -56,7 +56,7 @@ namespace Store_chain.Model
 
             modelBuilder.Entity<Employees>(entity =>
             {
-                entity.HasNoKey();
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.FirstName)
                     .HasColumnName("First_Name")
@@ -73,9 +73,9 @@ namespace Store_chain.Model
 
             modelBuilder.Entity<ProductCategories>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("Product_Categories");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Description)
                     .HasMaxLength(20)
@@ -84,7 +84,7 @@ namespace Store_chain.Model
 
             modelBuilder.Entity<Products>(entity =>
             {
-                entity.HasNoKey();
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Description)
                     .HasMaxLength(10)
@@ -97,9 +97,9 @@ namespace Store_chain.Model
 
             modelBuilder.Entity<StoreDepartments>(entity =>
             {
-                entity.HasNoKey();
-
                 entity.ToTable("Store_Departments");
+
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Description)
                     .HasMaxLength(20)
@@ -108,7 +108,7 @@ namespace Store_chain.Model
 
             modelBuilder.Entity<Suppliers>(entity =>
             {
-                entity.HasNoKey();
+                entity.Property(e => e.Id).ValueGeneratedNever();
 
                 entity.Property(e => e.Description)
                     .HasMaxLength(20)
