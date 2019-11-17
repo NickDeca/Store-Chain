@@ -1,6 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
+using Store_chain.Models;
 
 namespace Store_chain.Model
 {
@@ -95,6 +96,10 @@ namespace Store_chain.Model
                 entity.Property(e => e.IsDisplay).HasColumnName("isDisplay");
 
                 entity.Property(e => e.SupplierKey).HasColumnName("Supplier_Key");
+
+                entity.Property(e => e.CostSold).HasColumnType("decimal(18, 2)");
+
+                entity.Property(e => e.CostBought).HasColumnType("decimal(18, 2)");
             });
 
             modelBuilder.Entity<StoreDepartments>(entity =>

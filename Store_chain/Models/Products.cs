@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Store_chain.Model
+﻿namespace Store_chain.Models
 {
     public partial class Products
     {
@@ -11,5 +8,11 @@ namespace Store_chain.Model
         public int? Department { get; set; }
         public string Description { get; set; }
         public bool? IsDisplay { get; set; }
+        public int? CostSold { get; set; }
+        public int? CostBought { get; set; }
+
+        public int? QuantityInStorage { get; set; }
+
+        public int? QuantityInDisplay { get; set; }
     }
 }

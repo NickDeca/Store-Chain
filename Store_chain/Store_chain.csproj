@@ -6,10 +6,8 @@
 
 
   <ItemGroup>
-    <Folder Include="Data\DataEntities\" />
     <Folder Include="DtOs\" />
     <Folder Include="Enums\" />
-    <Folder Include="DataLayer\" />
   </ItemGroup>
 
 
