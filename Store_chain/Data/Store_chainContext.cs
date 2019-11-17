@@ -14,6 +14,6 @@ namespace Store_chain.Data
         {
         }
 
-        public DbSet<Store_chain.Models.Product> Product { get; set; }
+        public DbSet<Product> Product { get; set; }
     }
 }
