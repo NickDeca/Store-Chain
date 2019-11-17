@@ -1,6 +1,6 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.Extensions.Configuration;
 
 namespace Store_chain.Model
 {
@@ -26,8 +26,10 @@ namespace Store_chain.Model
         {
             if (!optionsBuilder.IsConfigured)
             {
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. See http://go.microsoft.com/fwlink/?LinkId=723263 for guidance on storing connection strings.
-                optionsBuilder.UseSqlServer("Data Source=localhost\\SQLEXPRESS;Initial Catalog=Store Chain;Integrated Security=True");
+                IConfigurationRoot configuration = new ConfigurationBuilder()
+                    .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                    .AddJsonFile("appsettings.json").Build();
+                optionsBuilder.UseSqlServer(configuration.GetConnectionString("Store_chainContext"));
             }
         }
 
@@ -35,7 +37,7 @@ namespace Store_chain.Model
         {
             modelBuilder.Entity<Customers>(entity =>
             {
-                entity.HasNoKey();
+                entity.Property(e => e.Id).ValueGeneratedOnAdd();
 
                 entity.Property(e => e.Capital).HasColumnType("decimal(18, 2)");
 
