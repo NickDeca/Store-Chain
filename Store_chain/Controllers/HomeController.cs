@@ -27,6 +27,7 @@ namespace Store_chain.Controllers
             return View();
         }
 
+        //TODO expand 
         public void Supply(Suppliers supplier, Products product, int productQuantity)
         {
             var boughtValue = product.CostBought * productQuantity;
