@@ -8,8 +8,8 @@
         public int? Department { get; set; }
         public string Description { get; set; }
         public bool? IsDisplay { get; set; }
-        public int? CostSold { get; set; }
-        public int? CostBought { get; set; }
+        public decimal CostSold { get; set; }
+        public decimal CostBought { get; set; }
 
         public int? QuantityInStorage { get; set; }
 
