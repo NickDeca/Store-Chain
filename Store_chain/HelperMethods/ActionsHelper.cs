@@ -4,6 +4,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Transactions;
+using Store_chain.Data;
+using TransactionManager = Store_chain.Data.TransactionManager;
 
 namespace Store_chain.HelperMethods
 {
@@ -15,8 +18,10 @@ namespace Store_chain.HelperMethods
             _context = context;
         }
 
-        public async Task Supply(Suppliers supplier, Products product, int productQuantity)
+        public async Task Supply(int supplierKey, Products product, int productQuantity)
         {
+            var supplier = _context.Suppliers.Find(supplierKey);
+
             if (product.SupplierKey != supplier.Id)
                 throw new Exception("The specified supplier does not contain the product");
 
@@ -60,16 +65,19 @@ namespace Store_chain.HelperMethods
 
         public async Task Buy(List<Products> cart, Customers buyer, Store store)
         {
+            // TODO product quantity
+            var summedValue = cart.Sum(x => x.CostSold * x.TransactionQuantity);
+            if (summedValue == 0)
+                throw new Exception("No Products bought");
+            // TODO Transaction Table 
+
+            if (buyer.Capital - summedValue <= 0)
+                throw new Exception("Customer Does not have the capital required to the transaction");
+
+            var transactionManager = new TransactionManager(_context);
+
             await using (var transaction = _context.Database.BeginTransaction())
             {
-                var summedValue = cart.Sum(x => x.CostSold);
-                if (summedValue == 0)
-                    throw new Exception("No Products bought");
-                // TODO Transaction Table 
-
-                if (buyer.Capital - summedValue <= 0)
-                    throw new Exception("Customer Does not have the capital required to the transaction");
-
                 buyer.Capital -= summedValue;
                 try
                 {
@@ -77,26 +85,52 @@ namespace Store_chain.HelperMethods
                     foreach (var product in cart)
                     {
                         var department = _context.StoreDepartments.FirstOrDefault(x => x.Id == product.Department && x.ProductKey == product.Id);
-                        CheckIfNeedReSupply(department);
+
+                        try
+                        {
+                            transactionManager.AddTransaction(new Transactions
+                            {
+                                CustomerKey = buyer.Id,
+                                ProductKey = product.Id,
+                                DateOfTransaction = DateTime.Now,
+                                Capital = product.CostSold,
+                                ProductQuantity = product.TransactionQuantity
+                            });
+
+                            // Todo state 1 here
+                        }
+                        catch (Exception error)
+                        {
+                            // Todo State 2 here
+                        }
+
                         _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
                     }
-
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e);
-                    throw;
+                    throw new Exception(e.Message);
                 }
+                await CheckIfNeedReSupply(cart);
                 store.Capital += summedValue;
 
+                _context.SaveChanges();
                 await transaction.CommitAsync();
             }
-
         }
 
-        private void CheckIfNeedReSupply(StoreDepartments department)
+        private async Task CheckIfNeedReSupply(IEnumerable<Products> products)
         {
-            throw new NotImplementedException();
+            var productsFromDepartments = (from product in products
+                                           join minQuantity in _context.MinQuantities
+                                               on product.Id equals minQuantity.id
+                                           where product.QuantityInStorage < minQuantity.MinStorage
+                                           select new
+                                           {
+                                               product,
+                                               QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
+                                           }).ToList();
+            await Task.Run(() => productsFromDepartments.ForEach( async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
     }
 }
