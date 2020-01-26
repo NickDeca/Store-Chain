@@ -4,8 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using System.Transactions;
 using Store_chain.Data;
+using Store_chain.Enums;
 using TransactionManager = Store_chain.Data.TransactionManager;
 
 namespace Store_chain.HelperMethods
@@ -43,7 +43,7 @@ namespace Store_chain.HelperMethods
             await _context.SaveChangesAsync();
         }
 
-        public async Task Display(Products product, int numToBeDisplayed)
+        public async Task Display(Products product, int numToBeDisplayed, int department)
         {
             var toBeSavedProduct = _context.Products.Find(product);
 
@@ -56,7 +56,32 @@ namespace Store_chain.HelperMethods
 
             if (storeDepartment == null)
                 throw new Exception("Department with Product's Department Id does not exist");
-            //TODO update Department to hold num of products held there
+
+            var productDepartment = _context.ProductDepartments.FirstOrDefault(x => x.DepartmentKey == department
+                                                                          && x.ProductKey == product.Id);
+
+            if (productDepartment == null)
+                _context.ProductDepartments.Add(new ProductCategories
+                {
+                    DepartmentKey = department,
+                    Description = product.Description,
+                    Number = numToBeDisplayed,
+                    State = product.QuantityInDisplay == numToBeDisplayed
+                        ? (int)DepartmentProductState.Filled
+                        : (int)DepartmentProductState.NeedFilling
+                });
+            else
+            {
+                productDepartment.Number += numToBeDisplayed;
+                if (productDepartment.Number == product.QuantityInDisplay)
+                    productDepartment.State = (int)DepartmentProductState.Filled;
+                else if (productDepartment.Number > product.QuantityInDisplay)
+                    productDepartment.State = (int)DepartmentProductState.OverFilled;
+                else
+                    productDepartment.State = (int)DepartmentProductState.NeedFilling;
+
+            }
+
             storeDepartment.MaxProducts += numToBeDisplayed;
 
             _context.StoreDepartments.Update(storeDepartment);
@@ -69,7 +94,7 @@ namespace Store_chain.HelperMethods
             var summedValue = cart.Sum(x => x.CostSold * x.TransactionQuantity);
             if (summedValue == 0)
                 throw new Exception("No Products bought");
-            // TODO Transaction Table 
+            var timeOfTransaction = DateTime.Now;
 
             if (buyer.Capital - summedValue <= 0)
                 throw new Exception("Customer Does not have the capital required to the transaction");
@@ -81,31 +106,42 @@ namespace Store_chain.HelperMethods
                 buyer.Capital -= summedValue;
                 try
                 {
+                    var customerFullTransaction =
+                        transactionManager.AddTransaction(new Transactions
+                        {
+                            CustomerKey = buyer.Id,
+                            DateOfTransaction = timeOfTransaction,
+                            Capital = summedValue,
+                            Major = (int)isMajorTransaction.Major,
+                            ErrorText = string.Empty
+                        });
                     _context.Customers.Update(buyer);
                     foreach (var product in cart)
                     {
                         var department = _context.StoreDepartments.FirstOrDefault(x => x.Id == product.Department && x.ProductKey == product.Id);
-
                         try
                         {
                             transactionManager.AddTransaction(new Transactions
                             {
                                 CustomerKey = buyer.Id,
                                 ProductKey = product.Id,
-                                DateOfTransaction = DateTime.Now,
+                                DateOfTransaction = timeOfTransaction,
                                 Capital = product.CostSold,
-                                ProductQuantity = product.TransactionQuantity
+                                ProductQuantity = product.TransactionQuantity,
+                                Major = (int)isMajorTransaction.Subset,
+                                ErrorText = "OK!"
                             });
-
-                            // Todo state 1 here
                         }
                         catch (Exception error)
                         {
-                            // Todo State 2 here
+                            customerFullTransaction.State = (int)StateEnum.ErrorState;
+                            customerFullTransaction.ErrorText = error.Message;
+                            throw;
                         }
 
                         _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
                     }
+                    customerFullTransaction.State = (int)StateEnum.OkState;
                 }
                 catch (Exception e)
                 {
@@ -130,7 +166,7 @@ namespace Store_chain.HelperMethods
                                                product,
                                                QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
                                            }).ToList();
-            await Task.Run(() => productsFromDepartments.ForEach( async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
+            await Task.Run(() => productsFromDepartments.ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
     }
 }

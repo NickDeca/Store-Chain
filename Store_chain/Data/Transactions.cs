@@ -14,5 +14,7 @@ namespace Store_chain.Data
         public DateTime DateOfTransaction { get; set; }
         public int? ProductQuantity { get; set; }
         public int? State { get; set; }
+        public int Major { get; set; }
+        public string ErrorText { get; set; }
     }
 }

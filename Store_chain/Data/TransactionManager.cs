@@ -18,16 +18,17 @@ namespace Store_chain.Data
         {
             _context.Add(transaction);
             _context.SaveChanges();
-            return GetTransaction(transaction.CustomerKey, transaction.ProductKey, transaction.DateOfTransaction);
+            return GetTransaction(transaction.CustomerKey, transaction.ProductKey, transaction.DateOfTransaction, transaction.Major);
         }
 
-        public Transactions GetTransaction(int? customer, int? product, DateTime dateTransaction)
+        public Transactions GetTransaction(int? customer, int? product, DateTime dateTransaction, int major)
         {
             return _context.transactionTable
                 .FirstOrDefault(x => x.CustomerKey == customer &&
                             x.ProductKey == product &&
                             x.DateOfTransaction == dateTransaction &&
-                            x.State != (int)StateEnum.ErrorState);
+                            x.State != (int)StateEnum.ErrorState &&
+                            x.Major == major);
         }
 
         public void AddTransactionRange(List<Transactions> transactions)
