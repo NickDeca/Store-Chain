@@ -88,7 +88,7 @@ namespace Store_chain.HelperMethods
             await _context.SaveChangesAsync();
         }
 
-        public async Task Buy(List<Products> cart, Customers buyer, Store store)
+        public async Task Buy(List<Products> cart, Customers buyer)
         {
             // TODO product quantity
             var summedValue = cart.Sum(x => x.CostSold * x.TransactionQuantity);
@@ -148,7 +148,9 @@ namespace Store_chain.HelperMethods
                     throw new Exception(e.Message);
                 }
                 await CheckIfNeedReSupply(cart);
-                store.Capital += summedValue;
+
+                _context.Store.Add(new Store() {Capital = summedValue , TimeOfTransaction = timeOfTransaction , TransactionKey = 0 });
+                //store.Capital += summedValue;
 
                 _context.SaveChanges();
                 await transaction.CommitAsync();
@@ -157,16 +159,19 @@ namespace Store_chain.HelperMethods
 
         private async Task CheckIfNeedReSupply(IEnumerable<Products> products)
         {
-            var productsFromDepartments = (from product in products
-                                           join minQuantity in _context.MinQuantities
-                                               on product.Id equals minQuantity.id
-                                           where product.QuantityInStorage < minQuantity.MinStorage
-                                           select new
-                                           {
-                                               product,
-                                               QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
-                                           }).ToList();
-            await Task.Run(() => productsFromDepartments.ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
+            var productsFromDepartments =
+                (from product in products
+                 join minQuantity in _context.MinQuantities
+                     on product.Id equals minQuantity.id
+                 where product.QuantityInStorage < minQuantity.MinStorage
+                 select new
+                 {
+                     product,
+                     QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
+                 }).ToList();
+            await Task.Run(() => productsFromDepartments
+                                 .ForEach(async x => 
+                                                await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
     }
 }

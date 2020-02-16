@@ -1,4 +1,4 @@
-﻿@model object
+﻿@model Products 
 
 @{
     ViewBag.Title = "Actions";
@@ -6,3 +6,8 @@
 }
 
 <h2>Actions</h2>
+<td>
+    <a asp-action="SupplyAction" asp-route-id="@(new Products().Id)">Supply</a> |
+    <a asp-action="DisplayAction" asp-route-id="@(new Products().Id)">Display</a> |
+    <a asp-action="BuyAction" asp-route-id="@(new Products().Id)">Buy</a>
+</td>
