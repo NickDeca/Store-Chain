@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace Store_chain.Model
 {
@@ -8,7 +9,9 @@ namespace Store_chain.Model
     {
         [Key]
         public int Id { get; set; }
+        [Column("First_Name")]
         public string FirstName { get; set; }
+        [Column("Last_Name")]
         public string LastName { get; set; }
         public int? DepartmentKey { get; set; }
         public bool? IsActive { get; set; }
