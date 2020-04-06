@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Store_chain.HelperMethods;
 using Store_chain.Model;
+using Store_chain.Models;
 
 namespace Store_chain.Controllers
 {
@@ -39,11 +40,23 @@ namespace Store_chain.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SupplyAction([Bind("SupplierKey,ProductKey,Quantity")] int supplierKey, int productKey, int quantity)
+        public async Task<IActionResult> SupplyAction([Bind("SupplierKey,Id,QuantityInStorage")] int supplierKey, int Id, int QuantityInStorage)
         {
-            var productForSupply = _context.Products.FirstOrDefault(x => x.Id == productKey);
+            try
+            {
+                var productForSupply = _context.Products.FirstOrDefault(x => x.Id == Id);
 
-            await _helper.Supply(supplierKey, productForSupply, quantity);
+                if(productForSupply == null)
+                    throw new Exception("Product was not found!");
+
+                await _helper.Supply(supplierKey, productForSupply, QuantityInStorage);
+
+            }
+            catch (Exception error)
+            {
+                ModelState.AddModelError("SupplierKey", $"{Environment.NewLine}{error.Message}");
+            }
+
             return View();
         }
 
@@ -85,7 +98,7 @@ namespace Store_chain.Controllers
             if (id == null) return NotFound();
 
             var product = await _context.Products.FindAsync(id);
-            return View(product);
+            return View(new List<Products>{ product });
         }
 
         [HttpPost]

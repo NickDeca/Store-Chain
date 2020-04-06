@@ -20,27 +20,32 @@ namespace Store_chain.HelperMethods
 
         public async Task Supply(int supplierKey, Products product, int productQuantity)
         {
-            var supplier = _context.Suppliers.Find(supplierKey);
+            try
+            {
+                var supplier = _context.Suppliers.FirstOrDefault(x => x.Id == supplierKey);
 
-            if (product.SupplierKey != supplier.Id)
-                throw new Exception("The specified supplier does not contain the product");
+                if(supplier == null)
+                    throw new Exception("The specified supplier was not found");
 
-            //TODO see better method to get from DB.
-            var boughtValue = product.CostBought * productQuantity;
-            var toBesSavedSupplier = _context.Suppliers.Find(supplier);
-            var toBeSavedProduct = _context.Products.Find(product);
+                if (product.SupplierKey != supplier.Id)
+                    throw new Exception("The specified supplier does not contain the product");
 
-            if (toBeSavedProduct == null)
-                throw new Exception("No such Product in the database");
-            if (toBesSavedSupplier == null)
-                throw new Exception("No such Supplier in the database");
-            toBesSavedSupplier.PaymentDue += boughtValue;
-            toBeSavedProduct.QuantityInStorage += productQuantity;
+                var boughtValue = product.CostBought * productQuantity;
+                
+                supplier.PaymentDue += boughtValue;
+                product.QuantityInStorage += productQuantity;
+                //TODO subtract money paid from store
+                //TODO transaction table enhmerwsh
 
-            _context.Suppliers.Update(toBesSavedSupplier);
-            _context.Products.Update(toBeSavedProduct);
+                _context.Suppliers.Update(supplier);
+                _context.Products.Update(product);
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception error)
+            {
+                throw error;
+            }
         }
 
         public async Task Display(Products product, int numToBeDisplayed, int department)
