@@ -114,7 +114,7 @@ namespace Store_chain.HelperMethods
                     var customerFullTransaction =
                         transactionManager.AddTransaction(new Transactions
                         {
-                            CustomerKey = buyer.Id,
+                            RecipientKey = buyer.Id,
                             DateOfTransaction = timeOfTransaction,
                             Capital = summedValue,
                             Major = (int)isMajorTransaction.Major,
@@ -128,7 +128,7 @@ namespace Store_chain.HelperMethods
                         {
                             transactionManager.AddTransaction(new Transactions
                             {
-                                CustomerKey = buyer.Id,
+                                RecipientKey = buyer.Id,
                                 ProductKey = product.Id,
                                 DateOfTransaction = timeOfTransaction,
                                 Capital = product.CostSold,

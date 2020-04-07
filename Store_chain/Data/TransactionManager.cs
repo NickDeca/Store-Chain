@@ -18,17 +18,18 @@ namespace Store_chain.Data
         {
             _context.Add(transaction);
             _context.SaveChanges();
-            return GetTransaction(transaction.CustomerKey, transaction.ProductKey, transaction.DateOfTransaction, transaction.Major);
+            return GetTransaction(transaction.RecipientKey, transaction.ProviderKey, transaction.ProductKey, transaction.DateOfTransaction, transaction.Major);
         }
 
-        public Transactions GetTransaction(int? customer, int? product, DateTime dateTransaction, int major)
+        public Transactions GetTransaction(int recipient, int provider, int? product, DateTime dateTransaction, int major)
         {
             return _context.transactionTable
-                .FirstOrDefault(x => x.CustomerKey == customer &&
-                            x.ProductKey == product &&
-                            x.DateOfTransaction == dateTransaction &&
-                            x.State != (int)StateEnum.ErrorState &&
-                            x.Major == major);
+                .FirstOrDefault(x => x.RecipientKey == recipient &&
+                                     x.ProviderKey == provider &&
+                                     x.ProductKey == product &&
+                                     x.DateOfTransaction == dateTransaction &&
+                                     x.State != (int)StateEnum.ErrorState &&
+                                     x.Major == major);
         }
 
         public void AddTransactionRange(List<Transactions> transactions)
@@ -37,10 +38,17 @@ namespace Store_chain.Data
             _context.SaveChanges();
         }
 
-        public IEnumerable<Transactions> GeTransactionsByCustomer(int customer)
+        public IEnumerable<Transactions> GeTransactionsByCustomer(int recipient)
         {
             return _context.transactionTable
-                .Where(x => x.CustomerKey == customer &&
+                .Where(x => x.RecipientKey == recipient &&
+                            x.State != (int)StateEnum.ErrorState);
+        }
+
+        public IEnumerable<Transactions> GeTransactionsByProvider(int provider)
+        {
+            return _context.transactionTable
+                .Where(x => x.ProviderKey == provider &&
                             x.State != (int)StateEnum.ErrorState);
         }
 
