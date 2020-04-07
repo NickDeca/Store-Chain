@@ -32,6 +32,17 @@ namespace Store_chain.Data
                                      x.Major == major);
         }
 
+        public Transactions GetTransaction(Transactions transaction)
+        {
+            return _context.transactionTable
+                .FirstOrDefault(x => x.RecipientKey == transaction.RecipientKey &&
+                                     x.ProviderKey == transaction.ProviderKey &&
+                                     x.ProductKey == transaction.ProductKey &&
+                                     x.DateOfTransaction == transaction.DateOfTransaction &&
+                                     x.State != (int)StateEnum.ErrorState &&
+                                     x.Major == transaction.Major);
+        }
+
         public void AddTransactionRange(List<Transactions> transactions)
         {
             _context.transactionTable.AddRange(transactions);

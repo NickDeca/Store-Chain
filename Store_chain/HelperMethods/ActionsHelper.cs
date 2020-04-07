@@ -20,30 +20,56 @@ namespace Store_chain.HelperMethods
 
         public async Task Supply(int supplierKey, Products product, int productQuantity)
         {
+            var timeOfTransaction = DateTime.Now;
+            var transactionManager = new TransactionManager(_context);
+
+            var transaction = new Transactions
+            {
+                RecipientKey = supplierKey,
+                ProviderKey = 0, // 0 is the shop
+                DateOfTransaction = timeOfTransaction,
+                Major = (int)isMajorTransaction.Major,
+                ErrorText = string.Empty,
+                State = (int)StateEnum.UndeterminedState
+            };
+
             try
             {
                 var supplier = _context.Suppliers.FirstOrDefault(x => x.Id == supplierKey);
 
-                if(supplier == null)
+                if (supplier == null)
                     throw new Exception("The specified supplier was not found");
 
                 if (product.SupplierKey != supplier.Id)
                     throw new Exception("The specified supplier does not contain the product");
 
                 var boughtValue = product.CostBought * productQuantity;
-                
+                transaction.Capital = boughtValue;
+
                 supplier.PaymentDue += boughtValue;
                 product.QuantityInStorage += productQuantity;
-                //TODO subtract money paid from store
-                //TODO transaction table enhmerwsh
-
+                
                 _context.Suppliers.Update(supplier);
                 _context.Products.Update(product);
 
                 await _context.SaveChangesAsync();
+                transaction.State = (int) StateEnum.OkState;
+                transactionManager.AddTransaction(transaction);
+
+                var idOfTransaction = transactionManager.GetTransaction(transaction).Id;
+
+                //TODO manager for store addTransaction (decimal value, int transactionKey, Enum.Supply or Sell) find the last row and -+ the value
+                _context.Store.Add(new CentralStoreCapital
+                {
+                });
+
             }
             catch (Exception error)
             {
+                transaction.ErrorText = error.Message;
+                transaction.State = (int) StateEnum.ErrorState;
+                transactionManager.AddTransaction(transaction);
+
                 throw error;
             }
         }
@@ -154,7 +180,7 @@ namespace Store_chain.HelperMethods
                 }
                 await CheckIfNeedReSupply(cart);
 
-                _context.Store.Add(new Store() {Capital = summedValue , TimeOfTransaction = timeOfTransaction , TransactionKey = 0 });
+                _context.Store.Add(new CentralStoreCapital { Capital = summedValue, TransactionKey = 0 });
                 //store.Capital += summedValue;
 
                 _context.SaveChanges();
@@ -175,7 +201,7 @@ namespace Store_chain.HelperMethods
                      QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
                  }).ToList();
             await Task.Run(() => productsFromDepartments
-                                 .ForEach(async x => 
+                                 .ForEach(async x =>
                                                 await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
     }

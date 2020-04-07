@@ -26,7 +26,8 @@ namespace Store_chain.Model
         public virtual DbSet<StoreDepartments> StoreDepartments { get; set; }
         public virtual DbSet<Suppliers> Suppliers { get; set; }
         public virtual DbSet<ProductMinQuantity> MinQuantities { get; set; }
-
-        public virtual DbSet<Store> Store { get; set; }
+        public virtual DbSet<CentralStoreCapital> Store { get; set; }
     }
+
+
 }
