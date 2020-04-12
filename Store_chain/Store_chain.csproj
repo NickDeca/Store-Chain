@@ -5,6 +5,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Models\Store.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Content Remove="Views\Actions\Actions.cshtml" />
   </ItemGroup>
 

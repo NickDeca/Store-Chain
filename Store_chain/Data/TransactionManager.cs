@@ -69,5 +69,11 @@ namespace Store_chain.Data
                 .Where(x => x.ProductKey == product &&
                             x.State != (int)StateEnum.ErrorState);
         }
+
+        public Transactions GeTransactionsById(int transactionKey)
+        {
+            return _context.transactionTable
+                .FirstOrDefault(x => x.Id == transactionKey);
+        }
     }
 }

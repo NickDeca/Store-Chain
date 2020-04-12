@@ -40,16 +40,16 @@ namespace Store_chain.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SupplyAction([Bind("SupplierKey,Id,QuantityInStorage")] int supplierKey, int Id, int QuantityInStorage)
+        public async Task<IActionResult> SupplyAction([Bind("SupplierKey,Id,QuantityInStorage")] int supplierKey, int id, int quantityInStorage)
         {
             try
             {
-                var productForSupply = _context.Products.FirstOrDefault(x => x.Id == Id);
+                var productForSupply = _context.Products.FirstOrDefault(x => x.Id == id);
 
                 if(productForSupply == null)
                     throw new Exception("Product was not found!");
 
-                await _helper.Supply(supplierKey, productForSupply, QuantityInStorage);
+                await _helper.Supply(supplierKey, productForSupply, quantityInStorage);
 
             }
             catch (Exception error)

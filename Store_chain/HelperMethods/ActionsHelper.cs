@@ -61,6 +61,7 @@ namespace Store_chain.HelperMethods
                 //TODO manager for store addTransaction (decimal value, int transactionKey, Enum.Supply or Sell) find the last row and -+ the value
                 _context.Store.Add(new CentralStoreCapital
                 {
+
                 });
 
             }
