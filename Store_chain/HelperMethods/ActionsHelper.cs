@@ -52,18 +52,19 @@ namespace Store_chain.HelperMethods
 
                 transaction.Capital = boughtValue;
                 await _context.SaveChangesAsync();
-                transaction.State = (int) StateEnum.OkState;
+                transaction.State = (int)StateEnum.OkState;
                 transactionManager.AddTransaction(transaction);
 
                 var idOfTransaction = transactionManager.GetTransaction(transaction).Id;
-                
+
                 var storeManager = new StoreManager(_context);
                 storeManager.CreateStoreRow(boughtValue, idOfTransaction, StoreCalculationEnum.Subtraction);
             }
             catch (Exception error)
             {
+                // transaction is updated to show the error message
                 transaction.ErrorText = error.Message;
-                transaction.State = (int) StateEnum.ErrorState;
+                transaction.State = (int)StateEnum.ErrorState;
                 transactionManager.AddTransaction(transaction);
 
                 throw;
@@ -102,6 +103,13 @@ namespace Store_chain.HelperMethods
             _context.Products.Update(product);
         }
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="product"></param>
+        /// <param name="numToBeDisplayed"></param>
+        /// <param name="department"></param>
+        /// <returns></returns>
         public async Task Display(Products product, int numToBeDisplayed, int department)
         {
             var toBeSavedProduct = _context.Products.Find(product);
@@ -110,40 +118,37 @@ namespace Store_chain.HelperMethods
                 throw new Exception("No such Product in the database");
 
             toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
+            
+            var productDepartment = _context.ProductDepartments
+                .FirstOrDefault(x => x.DepartmentKey == department && x.ProductKey == product.Id);
 
-            var storeDepartment = _context.StoreDepartments.FirstOrDefault(x => x.Id == product.Department);
-
-            if (storeDepartment == null)
-                throw new Exception("Department with Product's Department Id does not exist");
-
-            var productDepartment = _context.ProductDepartments.FirstOrDefault(x => x.DepartmentKey == department
-                                                                          && x.ProductKey == product.Id);
-
+            // if the connection does not exist create it
             if (productDepartment == null)
-                _context.ProductDepartments.Add(new ProductCategories
-                {
-                    DepartmentKey = department,
-                    Description = product.Description,
-                    Number = numToBeDisplayed,
-                    State = product.QuantityInDisplay == numToBeDisplayed
-                        ? (int)DepartmentProductState.Filled
-                        : (int)DepartmentProductState.NeedFilling
-                });
+            {
+                _context.ProductDepartments
+                    .Add(new ProductCategories
+                    {
+                        DepartmentKey = department,
+                        Description = product.Description,
+                        Number = numToBeDisplayed,
+                        State = product.QuantityInDisplay == numToBeDisplayed
+                            ? (int)DepartmentProductState.Filled
+                            : (int)DepartmentProductState.NeedFilling
+                    });
+            } 
+            // else update the number of products in display 
             else
             {
                 productDepartment.Number += numToBeDisplayed;
+
                 if (productDepartment.Number == product.QuantityInDisplay)
                     productDepartment.State = (int)DepartmentProductState.Filled;
                 else if (productDepartment.Number > product.QuantityInDisplay)
                     productDepartment.State = (int)DepartmentProductState.OverFilled;
                 else
                     productDepartment.State = (int)DepartmentProductState.NeedFilling;
-
             }
 
-            storeDepartment.MaxProducts += numToBeDisplayed;
-
-            _context.StoreDepartments.Update(storeDepartment);
             await _context.SaveChangesAsync();
         }
 
@@ -228,9 +233,8 @@ namespace Store_chain.HelperMethods
                      product,
                      QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
                  }).ToList();
-            await Task.Run(() => productsFromDepartments
-                                 .ForEach(async x =>
-                                                await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
+
+            await Task.Run(() => productsFromDepartments.ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
     }
 }
