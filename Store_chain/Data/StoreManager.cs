@@ -1,7 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
 using Store_chain.Enums;
 using Store_chain.Model;
 
@@ -15,19 +13,19 @@ namespace Store_chain.Data
             _context = context;
         }
 
-        public void CreateStoreRow(decimal capital, int transactionKey)
+        public void CreateStoreRow(decimal capital, int transactionKey, StoreCalculationEnum operation)
         {
             TransactionManager transactionManager = new TransactionManager(_context);
             try
             {
-                var lastStoreCapital = _context.Store.Last();
+                // Get last row in the Store table
+                var lastStoreCapital = _context.Store.LastOrDefault();
 
                 Transactions transaction = transactionManager.GeTransactionsById(transactionKey);
 
-                if (_context.Store.Any())
+                if (lastStoreCapital != null)
                 {
-
-                    var finalSum = lastStoreCapital.Capital - capital;
+                    var finalSum = operation == 0 ? lastStoreCapital.Capital - capital : lastStoreCapital.Capital + capital;
 
                     _context.Store.Add(new CentralStoreCapital
                     {

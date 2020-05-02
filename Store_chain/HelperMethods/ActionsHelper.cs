@@ -18,6 +18,15 @@ namespace Store_chain.HelperMethods
             _context = context;
         }
 
+        /// <summary>
+        /// It updates the supplier with their due money.
+        /// Updates product with quantity in storage.
+        /// Updates the last row of table store to be the capital in the store.
+        /// </summary>
+        /// <param name="supplierKey"></param>
+        /// <param name="product"></param>
+        /// <param name="productQuantity"></param>
+        /// <returns></returns>
         public async Task Supply(int supplierKey, Products product, int productQuantity)
         {
             var timeOfTransaction = DateTime.Now;
@@ -35,35 +44,21 @@ namespace Store_chain.HelperMethods
 
             try
             {
-                var supplier = _context.Suppliers.FirstOrDefault(x => x.Id == supplierKey);
-
-                if (supplier == null)
-                    throw new Exception("The specified supplier was not found");
-
-                if (product.SupplierKey != supplier.Id)
-                    throw new Exception("The specified supplier does not contain the product");
-
                 var boughtValue = product.CostBought * productQuantity;
+
+                UpdateSuppliersDue(supplierKey, boughtValue);
+
+                UpdateProductInStorage(product, supplierKey, productQuantity);
+
                 transaction.Capital = boughtValue;
-
-                supplier.PaymentDue += boughtValue;
-                product.QuantityInStorage += productQuantity;
-                
-                _context.Suppliers.Update(supplier);
-                _context.Products.Update(product);
-
                 await _context.SaveChangesAsync();
                 transaction.State = (int) StateEnum.OkState;
                 transactionManager.AddTransaction(transaction);
 
                 var idOfTransaction = transactionManager.GetTransaction(transaction).Id;
-
-                //TODO manager for store addTransaction (decimal value, int transactionKey, Enum.Supply or Sell) find the last row and -+ the value
-                _context.Store.Add(new CentralStoreCapital
-                {
-
-                });
-
+                
+                var storeManager = new StoreManager(_context);
+                storeManager.CreateStoreRow(boughtValue, idOfTransaction, StoreCalculationEnum.Subtraction);
             }
             catch (Exception error)
             {
@@ -71,8 +66,40 @@ namespace Store_chain.HelperMethods
                 transaction.State = (int) StateEnum.ErrorState;
                 transactionManager.AddTransaction(transaction);
 
-                throw error;
+                throw;
             }
+        }
+
+        /// <summary>
+        /// Supplier is updated with the money due.
+        /// </summary>
+        /// <param name="supplierKey"></param>
+        /// <param name="boughtValue"></param>
+        public void UpdateSuppliersDue(int supplierKey, decimal boughtValue)
+        {
+            var supplier = _context.Suppliers.FirstOrDefault(x => x.Id == supplierKey);
+            if (supplier == null)
+                throw new Exception("The specified supplier was not found");
+
+            supplier.PaymentDue += boughtValue;
+
+            _context.Suppliers.Update(supplier);
+        }
+
+        /// <summary>
+        /// Product's quantity in storage is updated
+        /// </summary>
+        /// <param name="product"></param>
+        /// <param name="supplierKey"></param>
+        /// <param name="productQuantity"></param>
+        public void UpdateProductInStorage(Products product, int supplierKey, int productQuantity)
+        {
+            if (product.SupplierKey != supplierKey)
+                throw new Exception("The specified supplier does not contain the product");
+
+            product.QuantityInStorage += productQuantity;
+
+            _context.Products.Update(product);
         }
 
         public async Task Display(Products product, int numToBeDisplayed, int department)
