@@ -126,7 +126,7 @@ namespace Store_chain.HelperMethods
             if (productDepartment == null)
             {
                 _context.ProductDepartments
-                    .Add(new ProductCategories
+                    .Add(new ProductDepartment
                     {
                         DepartmentKey = department,
                         Description = product.Description,

@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Store_chain.Model
 {
-    public partial class ProductCategories
+    public partial class ProductDepartment
     {
         [Key]
         public int Id { get; set; }

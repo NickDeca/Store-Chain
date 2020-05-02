@@ -19,7 +19,7 @@ namespace Store_chain.Model
 
         public virtual DbSet<Customers> Customers { get; set; }
         public virtual DbSet<Employees> Employees { get; set; }
-        public virtual DbSet<ProductCategories> ProductDepartments { get; set; }
+        public virtual DbSet<ProductDepartment> ProductDepartments { get; set; }
         public virtual DbSet<Transactions> transactionTable { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<StoreDepartments> StoreDepartments { get; set; }
