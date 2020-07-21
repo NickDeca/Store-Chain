@@ -5,4 +5,64 @@
     Layout = "_Layout";
 }
 
-<h2>title</h2>
+<table class="table">
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().SoldToCustomersCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().QuantityInDisplay)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Category)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.GroupBy(x => x.department).Select(x => new
+        {
+            x.Key,
+            Items = x.Select(x => x).ToList()
+        }))
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => item.Key.Description)
+            </dt>
+            foreach (var productse in item.Items)
+            {
+                if (productse.IsDisplay)
+                {
+
+
+                    <tr>
+                        <td>
+                            @Html.DisplayFor(modelItem => productse.Id)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => productse.SoldToCustomersCost)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => productse.Department)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => productse.QuantityInDisplay)
+                        </td>
+                        <td>
+                            @Html.DisplayFor(modelItem => productse.Category)
+                        </td>
+                    </tr>
+                <td>
+                    <a asp-action="BuyAction" asp-route-id="@productse.Id">Buy</a>
+                </td>
+            }
+        }
+    }
+        </tbody>
+    </table>

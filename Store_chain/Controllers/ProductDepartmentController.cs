@@ -1,6 +1,7 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Store_chain.DataLayer;
 using Store_chain.Enums;
 using Store_chain.Model;
 using Store_chain.Models;
@@ -22,16 +23,14 @@ namespace Store_chain.Controllers
                 .ToList();
 
             var join = (from product in products
-                        join department in _context.ProductDepartments
-                            on product.Id equals department.ProductKey
                         select new ProductDepartmentDto
                         {
                             Product = product,
-                            NumberDisplayed = department.Number,
-                            State = ((StateEnum)department.State).ToString()
+                            NumberDisplayed = product.department.Number,
+                            State = ((StateEnum)product.department.State).ToString()
                         }).ToList();
 
-            ViewBag["Department"] = _context.StoreDepartments.FirstOrDefault(x => x.Id == id)?.Description ?? string.Empty;
+            //ViewBag["Department"] = _context.StoreDepartments.FirstOrDefault(x => x.Id == id)?.Description ?? string.Empty;
 
             return View(join);
         }

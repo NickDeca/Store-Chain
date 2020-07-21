@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Store_chain.DataLayer;
 using Store_chain.HelperMethods;
 using Store_chain.Model;
 using Store_chain.Models;
@@ -97,8 +98,9 @@ namespace Store_chain.Controllers
         {
             if (id == null) return NotFound();
 
-            var product = await _context.Products.FindAsync(id);
-            return View(new List<Products>{ product });
+            var products =  _context.Products.ToList();
+            
+            return View(products);
         }
 
         [HttpPost]

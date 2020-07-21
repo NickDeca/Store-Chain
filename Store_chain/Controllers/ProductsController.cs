@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.DataLayer;
 using Store_chain.Model;
 using Store_chain.Models;
 
@@ -22,7 +23,11 @@ namespace Store_chain.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Products.ToListAsync());
+            var products = _context.Products.Select(x => x).ToList();
+
+            var debug = 3;
+
+            return View(products);
         }
 
         // GET: Products/Details/5

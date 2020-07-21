@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Store_chain.Data;
+using Store_chain.DataLayer;
 using Store_chain.Enums;
 using TransactionManager = Store_chain.Data.TransactionManager;
 
@@ -44,7 +45,7 @@ namespace Store_chain.HelperMethods
 
             try
             {
-                var boughtValue = product.CostBought * productQuantity;
+                var boughtValue = product.BoughtFromSuppliersCost * productQuantity;
 
                 UpdateSuppliersDue(supplierKey, boughtValue);
 
@@ -119,16 +120,16 @@ namespace Store_chain.HelperMethods
 
             toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
             
-            var productDepartment = _context.ProductDepartments
-                .FirstOrDefault(x => x.DepartmentKey == department && x.ProductKey == product.Id);
+            var productDepartment = _context.Departments
+                .FirstOrDefault(x => x.Id == department &&  x.Products.Any(z => z.Id == product.Id));
 
             // if the connection does not exist create it
             if (productDepartment == null)
             {
-                _context.ProductDepartments
-                    .Add(new ProductDepartment
+                _context.Departments
+                    .Add(new Department
                     {
-                        DepartmentKey = department,
+                        Id = department,
                         Description = product.Description,
                         Number = numToBeDisplayed,
                         State = product.QuantityInDisplay == numToBeDisplayed
@@ -155,7 +156,7 @@ namespace Store_chain.HelperMethods
         public async Task Buy(List<Products> cart, Customers buyer)
         {
             // TODO product quantity
-            var summedValue = cart.Sum(x => x.CostSold * x.TransactionQuantity);
+            var summedValue = cart.Sum(x => x.SoldToCustomersCost * x.TransactionQuantity);
             if (summedValue == 0)
                 throw new Exception("No Products bought");
             var timeOfTransaction = DateTime.Now;
@@ -182,7 +183,7 @@ namespace Store_chain.HelperMethods
                     _context.Customers.Update(buyer);
                     foreach (var product in cart)
                     {
-                        var department = _context.StoreDepartments.FirstOrDefault(x => x.Id == product.Department && x.ProductKey == product.Id);
+                        //var department = _context.StoreDepartments.FirstOrDefault(x => x.Id == product.Department && x.ProductKey == product.Id);
                         try
                         {
                             transactionManager.AddTransaction(new Transactions
@@ -190,7 +191,7 @@ namespace Store_chain.HelperMethods
                                 RecipientKey = buyer.Id,
                                 ProductKey = product.Id,
                                 DateOfTransaction = timeOfTransaction,
-                                Capital = product.CostSold,
+                                Capital = product.SoldToCustomersCost,
                                 ProductQuantity = product.TransactionQuantity,
                                 Major = (int)isMajorTransaction.Subset,
                                 ErrorText = "OK!"
@@ -203,7 +204,7 @@ namespace Store_chain.HelperMethods
                             throw;
                         }
 
-                        _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
+                       // _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
                     }
                     customerFullTransaction.State = (int)StateEnum.OkState;
                 }

@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Store_chain.DataLayer;
 using Store_chain.Model;
 using Store_chain.Models;
 

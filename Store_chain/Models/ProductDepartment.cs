@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using Store_chain.Models;
 
 namespace Store_chain.Model
 {
@@ -12,6 +13,6 @@ namespace Store_chain.Model
         public int? DepartmentKey { get; set; }
         public int? Number { get; set; }
         public int State { get; set; }
-        public int ProductKey { get; set; }
+        public List<Products> Products { get; set; }
     }
 }

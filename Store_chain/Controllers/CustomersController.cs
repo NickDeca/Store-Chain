@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.DataLayer;
 using Store_chain.Model;
 
 namespace Store_chain.Controllers
