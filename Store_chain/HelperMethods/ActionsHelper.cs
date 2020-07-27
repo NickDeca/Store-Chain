@@ -203,8 +203,7 @@ namespace Store_chain.HelperMethods
                             customerFullTransaction.ErrorText = error.Message;
                             throw;
                         }
-
-                       // _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
+// _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
                     }
                     customerFullTransaction.State = (int)StateEnum.OkState;
                 }
@@ -214,7 +213,7 @@ namespace Store_chain.HelperMethods
                 }
                 await CheckIfNeedReSupply(cart);
 
-                _context.Store.Add(new CentralStoreCapital { Capital = summedValue, TransactionKey = 0 });
+                _context.CentralStoreCapital.Add(new CentralStoreCapital { Capital = summedValue, TransactionKey = 0 });
                 //store.Capital += summedValue;
 
                 _context.SaveChanges();

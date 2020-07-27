@@ -1,5 +1,19 @@
-﻿@*
-    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
-*@
+﻿@model Store_chain.Data.CentralStoreCapital
+
 @{
+    ViewData["Title"] = "Index";
 }
+
+<h1>Index</h1>
+
+<p>
+    @if (@Html.ViewData.Model != null)
+    {
+        <p>The Capital of the Store is:
+            @Html.DisplayFor(model => model.Capital)</p>
+    }
+    else
+    {
+        <p>The Store, currently, does not have capital</p>
+    }
+</p>

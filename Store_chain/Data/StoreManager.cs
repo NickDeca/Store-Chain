@@ -2,7 +2,6 @@
 using System.Linq;
 using Store_chain.DataLayer;
 using Store_chain.Enums;
-using Store_chain.Model;
 
 namespace Store_chain.Data
 {
@@ -20,22 +19,28 @@ namespace Store_chain.Data
             try
             {
                 // Get last row in the Store table
-                var lastStoreCapital = _context.Store.LastOrDefault();
+                var lastStoreCapital = _context.CentralStoreCapital.LastOrDefault();
 
                 Transactions transaction = transactionManager.GeTransactionsById(transactionKey);
 
+                // If not the first ever made entity in Store
                 if (lastStoreCapital != null)
                 {
+                    // the last row in StoreCapital is the Final sum in the Store's capital and the transactionKey is the last responsible transaction that changed it
                     var finalSum = operation == 0 ? lastStoreCapital.Capital - capital : lastStoreCapital.Capital + capital;
 
-                    _context.Store.Add(new CentralStoreCapital
+                    _context.CentralStoreCapital.Add(new CentralStoreCapital
                     {
                         Capital = finalSum,
                         TransactionKey = transactionKey
                     });
                 }
-                else if (!_context.Store.Any() || transaction.State != (int)StateEnum.OkState)
+                // First Transaction to the Store 
+                else if (!_context.CentralStoreCapital.Any() || transaction.State != (int)StateEnum.OkState)
                 {
+                    if(operation == StoreCalculationEnum.Subtraction)
+                        throw new Exception("First ever transaction should be an addition");
+
                     DateTime timeNow = DateTime.Now;
 
                     var firstTransaction = new Transactions
@@ -52,7 +57,7 @@ namespace Store_chain.Data
                     };
                     transactionManager.AddTransaction(firstTransaction);
 
-                    _context.Store.Add(new CentralStoreCapital
+                    _context.CentralStoreCapital.Add(new CentralStoreCapital
                     {
                         Capital = capital,
                         TransactionKey = transactionKey
