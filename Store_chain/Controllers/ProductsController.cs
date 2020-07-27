@@ -24,9 +24,7 @@ namespace Store_chain.Controllers
         public async Task<IActionResult> Index()
         {
             var products = _context.Products.Select(x => x).ToList();
-
-            var debug = 3;
-
+            
             return View(products);
         }
 

@@ -5,13 +5,6 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="Pages\**" />
-    <Content Remove="Pages\**" />
-    <EmbeddedResource Remove="Pages\**" />
-    <None Remove="Pages\**" />
-  </ItemGroup>
-
-  <ItemGroup>
     <Compile Remove="Models\Store.cs" />
   </ItemGroup>
 
