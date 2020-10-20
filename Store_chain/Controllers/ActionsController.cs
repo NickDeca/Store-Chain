@@ -99,19 +99,21 @@ namespace Store_chain.Controllers
             if (id == null) return NotFound();
 
             var products =  _context.Products.ToList();
+
+            var customer = 0;
             
-            return View(products);
+            return View((products, customer));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BuyAction([Bind("ProductKey,NumToDisplay,Department")] List<int> productKeys, int customerKey, int department)
+        public async Task<IActionResult> BuyAction([Bind("ProductKey,NumToDisplay,Department")] int productKey, int customerKey, int department)
         {
-            var productForDisplay = _context.Products.Where(x => productKeys.Contains(x.Id));
+            var productForDisplay = _context.Products.FirstOrDefault(x => productKey == x.Id);
             var customer = _context.Customers.Find(customerKey);
 
-            await _helper.Buy(productForDisplay.ToList(),  customer);
-            return View(productForDisplay.ToList());
+            await _helper.Buy(productForDisplay,  customer);
+            return View((productForDisplay.ToList(),customer));
         }
     }
 }

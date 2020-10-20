@@ -8,6 +8,7 @@ namespace Store_chain.Model
     public partial class Customers
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         public decimal? Capital { get; set; }
         public string Description { get; set; }

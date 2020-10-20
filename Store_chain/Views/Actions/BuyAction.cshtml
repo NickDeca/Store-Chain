@@ -1,4 +1,4 @@
-﻿@model List<Products>
+﻿@model (List<Products> products, int customer)
 
 @{
     ViewBag.Title = "title";
@@ -9,24 +9,24 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.First().Id)
+                @Html.DisplayNameFor(model => model.products.First().Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.First().SoldToCustomersCost)
+                @Html.DisplayNameFor(model => model.products.First().SoldToCustomersCost)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.First().Description)
+                @Html.DisplayNameFor(model => model.products.First().Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.First().QuantityInDisplay)
+                @Html.DisplayNameFor(model => model.products.First().QuantityInDisplay)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.First().Category)
+                @Html.DisplayNameFor(model => model.products.First().Category)
             </th>
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.GroupBy(x => x.department).Select(x => new
+        @foreach (var item in Model.products.GroupBy(x => x.department).Select(x => new
         {
             x.Key,
             Items = x.Select(x => x).ToList()
@@ -58,6 +58,11 @@
                             @Html.DisplayFor(modelItem => productse.Category)
                         </td>
                     </tr>
+                    <div class="form-group">
+                        <label asp-for="customer" class="control-label"></label>
+                        <input asp-for="customer" class="form-control" />
+                        <span asp-validation-for="customer" class="text-danger"></span>
+                    </div>
                 <td>
                     <a asp-action="BuyAction" asp-route-id="@productse.Id">Buy</a>
                 </td>

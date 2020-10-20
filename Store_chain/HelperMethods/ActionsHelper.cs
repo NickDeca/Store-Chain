@@ -153,10 +153,13 @@ namespace Store_chain.HelperMethods
             await _context.SaveChangesAsync();
         }
 
-        public async Task Buy(List<Products> cart, Customers buyer)
+        public async Task Buy(Products cart, Customers buyer)
         {
-            // TODO product quantity
-            var summedValue = cart.Sum(x => x.SoldToCustomersCost * x.TransactionQuantity);
+            // TODO one product rewrite
+
+            var summedValue = cart.SoldToCustomersCost * cart.TransactionQuantity;
+
+            //var summedValue = cart.Sum(x => x.SoldToCustomersCost * x.TransactionQuantity);
             if (summedValue == 0)
                 throw new Exception("No Products bought");
             var timeOfTransaction = DateTime.Now;
@@ -181,18 +184,16 @@ namespace Store_chain.HelperMethods
                             ErrorText = string.Empty
                         });
                     _context.Customers.Update(buyer);
-                    foreach (var product in cart)
-                    {
                         //var department = _context.StoreDepartments.FirstOrDefault(x => x.Id == product.Department && x.ProductKey == product.Id);
                         try
                         {
                             transactionManager.AddTransaction(new Transactions
                             {
                                 RecipientKey = buyer.Id,
-                                ProductKey = product.Id,
+                                ProductKey = cart.Id,
                                 DateOfTransaction = timeOfTransaction,
-                                Capital = product.SoldToCustomersCost,
-                                ProductQuantity = product.TransactionQuantity,
+                                Capital = cart.SoldToCustomersCost,
+                                ProductQuantity = cart.TransactionQuantity,
                                 Major = (int)isMajorTransaction.Subset,
                                 ErrorText = "OK!"
                             });
@@ -203,8 +204,8 @@ namespace Store_chain.HelperMethods
                             customerFullTransaction.ErrorText = error.Message;
                             throw;
                         }
-// _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
-                    }
+                        // _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
+                    
                     customerFullTransaction.State = (int)StateEnum.OkState;
                 }
                 catch (Exception e)
@@ -221,7 +222,7 @@ namespace Store_chain.HelperMethods
             }
         }
 
-        private async Task CheckIfNeedReSupply(IEnumerable<Products> products)
+        private async Task CheckIfNeedReSupply(List<Products> products)
         {
             var productsFromDepartments =
                 (from product in products
@@ -234,7 +235,8 @@ namespace Store_chain.HelperMethods
                      QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
                  }).ToList();
 
-            await Task.Run(() => productsFromDepartments.ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
+            await Task.Run(() => productsFromDepartments
+                .ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
     }
 }
