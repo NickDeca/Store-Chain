@@ -1,12 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.HelperMethods;
-using Store_chain.Model;
-using Store_chain.Models;
 
 namespace Store_chain.Controllers
 {
@@ -94,26 +92,27 @@ namespace Store_chain.Controllers
         /// Get
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> BuyAction(int? id)
+        public async Task<IActionResult> BuyAction()
         {
-            if (id == null) return NotFound();
-
             var products =  _context.Products.ToList();
-
-            var customer = 0;
+            var buyClass = new BuyActionClass();
             
-            return View((products, customer));
+            return View((products,buyClass));
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BuyAction([Bind("ProductKey,NumToDisplay,Department")] int productKey, int customerKey, int department)
+        public async Task<IActionResult> BuyAction([Bind("BuyClass.ProductKey, BuyClass.CustomerKey")] 
+            int productKey, int customerKey)
         {
+            //var customerKey = 0;
             var productForDisplay = _context.Products.FirstOrDefault(x => productKey == x.Id);
             var customer = _context.Customers.Find(customerKey);
 
+            var buyClass = new BuyActionClass{ProductKey = productKey,CustomerKey = customerKey};
+
             await _helper.Buy(productForDisplay,  customer);
-            return View((productForDisplay.ToList(),customer));
+            return View((productForDisplay.toListFromOne(),buyClass));
         }
     }
 }

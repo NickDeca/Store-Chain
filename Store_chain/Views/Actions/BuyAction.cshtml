@@ -1,4 +1,4 @@
-﻿@model (List<Products> products, int customer)
+﻿@model (List<Products> products, Store_chain.Data.BuyActionClass BuyClass)
 
 @{
     ViewBag.Title = "title";
@@ -39,10 +39,14 @@
             {
                 if (productse.IsDisplay)
                 {
-
-
-                    <tr>
-                        <td>
+                    <form asp-action="BuyAction">
+                        <div class="form-group">
+                            <label asp-for="BuyClass.ProductKey" class="control-label"></label>
+                            <span asp-validation-for="BuyClass.ProductKey" class="text-danger">
+                                @Html.DisplayFor(modelItem => productse.Id)
+                            </span>
+                        </div>
+                        <td asp-for="ProductId">
                             @Html.DisplayFor(modelItem => productse.Id)
                         </td>
                         <td>
@@ -57,15 +61,18 @@
                         <td>
                             @Html.DisplayFor(modelItem => productse.Category)
                         </td>
-                    </tr>
-                    <div class="form-group">
-                        <label asp-for="customer" class="control-label"></label>
-                        <input asp-for="customer" class="form-control" />
-                        <span asp-validation-for="customer" class="text-danger"></span>
-                    </div>
-                <td>
-                    <a asp-action="BuyAction" asp-route-id="@productse.Id">Buy</a>
-                </td>
+                        <div class="form-group">
+                            <label asp-for="BuyClass.CustomerKey" class="control-label"></label>
+                            <input asp-for="BuyClass.CustomerKey" class="form-control" />
+                            <span asp-validation-for="BuyClass.CustomerKey" class="text-danger"></span>
+                        </div>
+                        @*<label asp-for="BuyClass.CustomerKey"></label>
+                        <input type="number" asp-for="BuyClass.CustomerKey" width="10">*@
+                        <div class="form-group">
+                            <input type="submit" value="Buy" class="btn"/>
+                        </div>
+                    </form>
+                    <br/>
             }
         }
     }

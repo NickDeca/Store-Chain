@@ -212,7 +212,7 @@ namespace Store_chain.HelperMethods
                 {
                     throw new Exception(e.Message);
                 }
-                await CheckIfNeedReSupply(cart);
+                await CheckIfNeedReSupply(cart.toListFromOne());
 
                 _context.CentralStoreCapital.Add(new CentralStoreCapital { Capital = summedValue, TransactionKey = 0 });
                 //store.Capital += summedValue;
