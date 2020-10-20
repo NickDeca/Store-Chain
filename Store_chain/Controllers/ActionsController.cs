@@ -102,17 +102,19 @@ namespace Store_chain.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BuyAction([Bind("BuyClass.ProductKey, BuyClass.CustomerKey")] 
-            int productKey, int customerKey)
+        public async Task<IActionResult> BuyAction([Bind("BuyClass")] 
+             BuyActionClass buyClass)
         {
             //var customerKey = 0;
-            var productForDisplay = _context.Products.FirstOrDefault(x => productKey == x.Id);
-            var customer = _context.Customers.Find(customerKey);
+            var productForDisplay = _context.Products.FirstOrDefault(x => buyClass.ProductKey == x.Id);
 
-            var buyClass = new BuyActionClass{ProductKey = productKey,CustomerKey = customerKey};
+            var products = _context.Products.ToList();
+            var customer = _context.Customers.Find(buyClass.CustomerKey);
+
+            var buyClassView = new BuyActionClass{ProductKey = buyClass.ProductKey,CustomerKey = buyClass.CustomerKey};
 
             await _helper.Buy(productForDisplay,  customer);
-            return View((productForDisplay.toListFromOne(),buyClass));
+            return View((products,buyClassView));
         }
     }
 }
