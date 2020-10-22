@@ -23,6 +23,9 @@
             <th>
                 @Html.DisplayNameFor(model => model.products.First().Category)
             </th>
+            <th>
+                Customer
+            </th>
         </tr>
     </thead>
     <tbody>
@@ -37,44 +40,39 @@
             </dt>
             foreach (var productse in item.Items)
             {
-                if (productse.IsDisplay)
+
+                @if (productse.IsDisplay)
                 {
-                    <form asp-action="BuyAction">
-                        <div class="form-group">
-                            <label asp-for="BuyClass.ProductKey" class="control-label"></label>
-                            <span asp-validation-for="BuyClass.ProductKey" class="text-danger">
-                                @Html.DisplayFor(modelItem => productse.Id)
-                            </span>
-                        </div>
-                        <td asp-for="ProductId">
-                            @Html.DisplayFor(modelItem => productse.Id)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => productse.SoldToCustomersCost)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => productse.Department)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => productse.QuantityInDisplay)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => productse.Category)
-                        </td>
-                        <div class="form-group">
-                            <label asp-for="BuyClass.CustomerKey" class="control-label"></label>
-                            <input asp-for="BuyClass.CustomerKey" class="form-control" />
-                            <span asp-validation-for="BuyClass.CustomerKey" class="text-danger"></span>
-                        </div>
-                        @*<label asp-for="BuyClass.CustomerKey"></label>
-                        <input type="number" asp-for="BuyClass.CustomerKey" width="10">*@
-                        <div class="form-group">
-                            <input type="submit" value="Buy" class="btn"/>
-                        </div>
-                    </form>
-                    <br/>
+                    <tr>
+                        <form asp-action="BuyAction" method="post">
+                            <td>
+                                <label name="ProductKey">
+                                    @Html.DisplayFor(modelItem => productse.Id)
+                                </label>
+                            </td>
+                            <input type="hidden" name="ProductKey" value="@Html.DisplayFor(modelItem => productse.Id)">
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.SoldToCustomersCost)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.Department)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.QuantityInDisplay)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.Category)
+                            </td>
+                            <td>
+                                <input type="text" name="CustomerKey" />
+                            </td>
+                            <td>
+                                <input type="submit" value="Buy" class="btn" />
+                            </td>
+                        </form>
+                    </tr>
+                }
             }
         }
-    }
-        </tbody>
-    </table>
+    </tbody>
+</table>
