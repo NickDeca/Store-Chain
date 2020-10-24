@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.HelperMethods;
@@ -108,17 +109,34 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BuyAction(BuyActionClass buyClass)
         {
-            var productBought = _context.Products.FirstOrDefault(x => buyClass.ProductKey == x.Id);
+            try
+            {
+                var productBought = _context.Products.FirstOrDefault(x => buyClass.ProductKey == x.Id);
 
-            var products = _context.Products.ToList();
-            var customer = await _context.Customers.FindAsync(buyClass.CustomerKey);
+                if (productBought == null)
+                    throw new Exception("Major failure in server database");
 
-            if (customer == null)
-                RedirectToAction(nameof(BuyAction));
+                if (productBought.QuantityInDisplay < buyClass.Quantity)
+                    throw new Exception("Cannot buy that amount of product");
 
-            await _helper.UpdateProductInDisplay(productBought);
-            await _helper.Buy(productBought, customer);
-            return View(products);
+                productBought.TransactionQuantity = buyClass.Quantity;
+
+                var products = _context.Products.ToList();
+                var customer = await _context.Customers.FindAsync(buyClass.CustomerKey);
+
+                if (customer == null)
+                    throw new Exception("Customer not found retry!");
+
+                await _helper.UpdateProductInDisplay(productBought);
+                await _helper.Buy(productBought, customer);
+                return View(products);
+            }
+            catch (Exception err)
+            {
+                ViewBag.AlertMessage = err.Message;
+                //TODO alert popup does not popup
+                return RedirectToAction(nameof(BuyAction));
+            }
         }
     }
 }

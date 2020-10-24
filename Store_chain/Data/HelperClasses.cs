@@ -9,5 +9,6 @@ namespace Store_chain.Data
     {
         public int ProductKey { get; set; }
         public int CustomerKey { get; set; }
+        public int Quantity { get; set; }
     }
 }

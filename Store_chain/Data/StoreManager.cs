@@ -52,7 +52,6 @@ namespace Store_chain.Data
                         DateOfTransaction = timeNow,
                         ProductQuantity = 0,
                         State = (int)StateEnum.OkState,
-                        Major = 0, //TODO why did i put it here ?
                         ErrorText = string.Empty,
                     };
                     transactionManager.AddTransaction(firstTransaction);

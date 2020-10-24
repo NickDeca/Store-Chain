@@ -19,18 +19,17 @@ namespace Store_chain.Data
         {
             _context.Add(transaction);
             _context.SaveChanges();
-            return GetTransaction(transaction.RecipientKey, transaction.ProviderKey, transaction.ProductKey, transaction.DateOfTransaction, transaction.Major);
+            return GetTransaction(transaction.RecipientKey, transaction.ProviderKey, transaction.ProductKey, transaction.DateOfTransaction);
         }
 
-        public Transactions GetTransaction(int recipient, int provider, int? product, DateTime dateTransaction, int major)
+        public Transactions GetTransaction(int recipient, int provider, int? product, DateTime dateTransaction)
         {
             return _context.transactionTable
                 .FirstOrDefault(x => x.RecipientKey == recipient &&
                                      x.ProviderKey == provider &&
                                      x.ProductKey == product &&
                                      x.DateOfTransaction == dateTransaction &&
-                                     x.State != (int)StateEnum.ErrorState &&
-                                     x.Major == major);
+                                     x.State != (int)StateEnum.ErrorState);
         }
 
         public Transactions GetTransaction(Transactions transaction)
@@ -40,8 +39,7 @@ namespace Store_chain.Data
                                      x.ProviderKey == transaction.ProviderKey &&
                                      x.ProductKey == transaction.ProductKey &&
                                      x.DateOfTransaction == transaction.DateOfTransaction &&
-                                     x.State != (int)StateEnum.ErrorState &&
-                                     x.Major == transaction.Major);
+                                     x.State != (int)StateEnum.ErrorState);
         }
 
         public void AddTransactionRange(List<Transactions> transactions)

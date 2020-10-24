@@ -154,8 +154,6 @@ namespace Store_chain.HelperMethods
 
         public async Task Buy(Products product, Customers buyer)
         {
-            // TODO one product rewrite
-
             // Get the value for all the products the customer is buying 
             var summedValue = product.SoldToCustomersCost * product.TransactionQuantity;
 
@@ -246,7 +244,7 @@ namespace Store_chain.HelperMethods
         public async Task UpdateProductInDisplay(Products productBought)
         {
             //TODO From Buy Remove some products in Display
-            //TODO HTml have how many the customer is buying
+            productBought.QuantityInDisplay = productBought.QuantityInDisplay - productBought.TransactionQuantity;
         }
     }
 }
