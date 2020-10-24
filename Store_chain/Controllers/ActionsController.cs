@@ -94,26 +94,28 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         public async Task<IActionResult> BuyAction()
         {
-            var products =  _context.Products.ToList();
-            var buyClass = new BuyActionClass();
+            var products = _context.Products.ToList();
             
-            return View((products,buyClass));
+            return View(products);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> BuyAction(BuyActionClass BuyClass)
+        public async Task<IActionResult> BuyAction(BuyActionClass buyClass)
         {
             //var customerKey = 0;
-            var productForDisplay = _context.Products.FirstOrDefault(x => BuyClass.ProductKey == x.Id);
+            var productForDisplay = _context.Products.FirstOrDefault(x => buyClass.ProductKey == x.Id);
 
             var products = _context.Products.ToList();
-            var customer = _context.Customers.Find(BuyClass.CustomerKey);
-            
-            var buyClassView = new BuyActionClass{ProductKey = BuyClass.ProductKey,CustomerKey = BuyClass.CustomerKey};
+            var customer = await _context.Customers.FindAsync(buyClass.CustomerKey);
+
+            if (customer == null)
+            {
+                RedirectToAction(nameof(BuyAction));
+            }
 
             await _helper.Buy(productForDisplay,  customer);
-            return View((products,buyClassView));
+            return View(products);
         }
     }
 }

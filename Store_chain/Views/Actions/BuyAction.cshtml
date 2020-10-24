@@ -1,4 +1,4 @@
-﻿@model (List<Products> products, Store_chain.Data.BuyActionClass BuyClass)
+﻿@model List<Products>
 
 @{
     ViewBag.Title = "title";
@@ -9,19 +9,19 @@
     <thead>
         <tr>
             <th>
-                @Html.DisplayNameFor(model => model.products.First().Id)
+                @Html.DisplayNameFor(model => model.First().Id)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.products.First().SoldToCustomersCost)
+                @Html.DisplayNameFor(model => model.First().SoldToCustomersCost)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.products.First().Description)
+                @Html.DisplayNameFor(model => model.First().Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.products.First().QuantityInDisplay)
+                @Html.DisplayNameFor(model => model.First().QuantityInDisplay)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.products.First().Category)
+                @Html.DisplayNameFor(model => model.First().Category)
             </th>
             <th>
                 Customer
@@ -29,7 +29,7 @@
         </tr>
     </thead>
     <tbody>
-        @foreach (var item in Model.products.GroupBy(x => x.department).Select(x => new
+        @foreach (var item in Model.GroupBy(x => x.department).Select(x => new
         {
             x.Key,
             Items = x.Select(x => x).ToList()
