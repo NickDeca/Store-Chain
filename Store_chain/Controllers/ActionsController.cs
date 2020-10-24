@@ -45,7 +45,7 @@ namespace Store_chain.Controllers
             {
                 var productForSupply = _context.Products.FirstOrDefault(x => x.Id == id);
 
-                if(productForSupply == null)
+                if (productForSupply == null)
                     throw new Exception("Product was not found!");
 
                 await _helper.Supply(supplierKey, productForSupply, quantityInStorage);
@@ -95,26 +95,29 @@ namespace Store_chain.Controllers
         public async Task<IActionResult> BuyAction()
         {
             var products = _context.Products.ToList();
-            
+
             return View(products);
         }
 
+        /// <summary>
+        /// Main Action for the Buy feature
+        /// </summary>
+        /// <param name="buyClass"></param>
+        /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BuyAction(BuyActionClass buyClass)
         {
-            //var customerKey = 0;
-            var productForDisplay = _context.Products.FirstOrDefault(x => buyClass.ProductKey == x.Id);
+            var productBought = _context.Products.FirstOrDefault(x => buyClass.ProductKey == x.Id);
 
             var products = _context.Products.ToList();
             var customer = await _context.Customers.FindAsync(buyClass.CustomerKey);
 
             if (customer == null)
-            {
                 RedirectToAction(nameof(BuyAction));
-            }
 
-            await _helper.Buy(productForDisplay,  customer);
+            await _helper.UpdateProductInDisplay(productBought);
+            await _helper.Buy(productBought, customer);
             return View(products);
         }
     }
