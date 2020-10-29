@@ -243,8 +243,20 @@ namespace Store_chain.HelperMethods
 
         public async Task UpdateProductInDisplay(Products productBought)
         {
-            //TODO From Buy Remove some products in Display
-            productBought.QuantityInDisplay = productBought.QuantityInDisplay - productBought.TransactionQuantity;
+            //TODO From Buy Remove some products in Display // Check if correct
+            productBought.QuantityInDisplay -= productBought.TransactionQuantity;
+            _context.SaveChanges();
+        }
+
+        public void CheckValidityOfBuy(BuyActionClass buyClass)
+        {
+            if (buyClass.CustomerKey == 0)
+                throw new Exception("Please select a customer");
+            if(buyClass.ProductKey == 0)
+                throw new Exception("Please select a product");
+            if(buyClass.Quantity == 0)
+                throw new Exception("Please give an amount of product you want to buy");
+
         }
     }
 }

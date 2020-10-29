@@ -109,8 +109,14 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BuyAction(BuyActionClass buyClass)
         {
+            // the products need to be outside the try block because they are used to reset the page 
+            // in failure or success
+            var products = _context.Products.ToList();
             try
             {
+                // check if all the data send from the user are present
+                _helper.CheckValidityOfBuy(buyClass);
+
                 var productBought = _context.Products.FirstOrDefault(x => buyClass.ProductKey == x.Id);
 
                 if (productBought == null)
@@ -121,7 +127,6 @@ namespace Store_chain.Controllers
 
                 productBought.TransactionQuantity = buyClass.Quantity;
 
-                var products = _context.Products.ToList();
                 var customer = await _context.Customers.FindAsync(buyClass.CustomerKey);
 
                 if (customer == null)
@@ -134,8 +139,7 @@ namespace Store_chain.Controllers
             catch (Exception err)
             {
                 ViewBag.AlertMessage = err.Message;
-                //TODO alert popup does not popup
-                return RedirectToAction(nameof(BuyAction));
+                return View(products);
             }
         }
     }
