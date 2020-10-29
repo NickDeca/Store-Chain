@@ -120,7 +120,7 @@ namespace Store_chain.HelperMethods
             toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
 
             var productAlreadyInDepartment = _context.Department
-                .FirstOrDefault(x => x.Id == department && x.Products.Any(z => z.Id == product.Id));
+                .FirstOrDefault(x => x.Id == department && x.Prod_Id == product.Id);
 
             // if the connection does not exist create it
             if (productAlreadyInDepartment == null)

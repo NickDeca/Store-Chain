@@ -80,16 +80,20 @@ namespace Store_chain.Controllers
         /// <param name="productKey"></param>
         /// <param name="numToDisplay"></param>
         /// <param name="department"></param>
+        /// <param name="displayBtn"></param>
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DisplayAction([Bind("ProductKey,NumToDisplay,Department")] int productKey, int numToDisplay, int department)
+        public async Task<IActionResult> DisplayAction([Bind("ProductKey,NumToDisplay,Department,DisplayAction")] int productKey, int numToDisplay, int department
+            , string displayBtn)
         {
             try
             {
                 var products = _helper.BringAllProducts();
                 var productForDisplay = _context.Products.FirstOrDefault(x => x.Id == productKey);
+                //TODO displayAction for exception handling
                 await _helper.Display(productForDisplay, numToDisplay, department);
+
                 return View(products);
             }
             catch (Exception err)

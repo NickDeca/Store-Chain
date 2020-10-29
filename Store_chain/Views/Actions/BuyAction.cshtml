@@ -33,53 +33,56 @@
     </tr>
     </thead>
     <tbody>
-    @foreach (var item in Model.GroupBy(x => x.department).Select(x => new
-    {
-        x.Key,
-        Items = x.Select(x => x).ToList()
-    }))
-    {
-        <dt class="col-sm-2">
-            @Html.DisplayNameFor(model => item.Key.Description)
-        </dt>
-        foreach (var productse in item.Items)
+        @foreach (var item in Model.GroupBy(x => x.department).Select(x => new
         {
-
-            @if (productse.IsDisplay)
+            x.Key,
+            Items = x.Select(z => z).ToList()
+        }))
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => item.Key.Description)
+            </dt>
+            <tb class="col-sm-2">
+                @Html.DisplayFor(model => item.Key.Description)
+            </tb>
+            foreach (var productse in item.Items)
             {
-                <tr>
-                    <form asp-action="BuyAction" method="post">
-                        <td>
-                            <label name="ProductKey">
-                                @Html.DisplayFor(modelItem => productse.Id)
-                            </label>
-                        </td>
-                        <input type="hidden" name="ProductKey" value="@Html.DisplayFor(modelItem => productse.Id)">
-                        <td>
-                            @Html.DisplayFor(modelItem => productse.SoldToCustomersCost)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => productse.Department)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => productse.QuantityInDisplay)
-                        </td>
-                        <td>
-                            @Html.DisplayFor(modelItem => productse.Category)
-                        </td>
-                        <td>
-                            <input type="text" name="CustomerKey"/>
-                        </td>
-                        <td>
-                            <input type="number" name="Quantity"/>
-                        </td>
-                        <td>
-                            <input type="submit" value="Buy" class="btn"/>
-                        </td>
-                    </form>
-                </tr>
+
+                @if (productse.IsDisplay)
+                {
+                    <tr>
+                        <form asp-action="BuyAction" method="post">
+                            <td>
+                                <label name="ProductKey">
+                                    @Html.DisplayFor(modelItem => productse.Id)
+                                </label>
+                            </td>
+                            <input type="hidden" name="ProductKey" value="@Html.DisplayFor(modelItem => productse.Id)">
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.SoldToCustomersCost)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.Department)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.QuantityInDisplay)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.Category)
+                            </td>
+                            <td>
+                                <input type="text" name="CustomerKey" />
+                            </td>
+                            <td>
+                                <input type="number" name="Quantity" />
+                            </td>
+                            <td>
+                                <input type="submit" value="Buy" class="btn" />
+                            </td>
+                        </form>
+                    </tr>
+                }
             }
         }
-    }
     </tbody>
 </table>
