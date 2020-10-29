@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.HelperMethods;
+using Store_chain.Models;
 
 namespace Store_chain.Controllers
 {
@@ -68,8 +69,9 @@ namespace Store_chain.Controllers
         {
             if (id == null) return NotFound();
 
-            var product = await _context.Products.FindAsync(id);
-            return View(product);
+            var products = _helper.BringAllProducts();
+
+            return View(products);
         }
 
         /// <summary>
@@ -83,10 +85,19 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DisplayAction([Bind("ProductKey,NumToDisplay,Department")] int productKey, int numToDisplay, int department)
         {
-
-            var productForDisplay = _context.Products.FirstOrDefault(x => x.Id == productKey);
-            await _helper.Display(productForDisplay, numToDisplay, department);
-            return View();
+            try
+            {
+                var products = _helper.BringAllProducts();
+                var productForDisplay = _context.Products.FirstOrDefault(x => x.Id == productKey);
+                await _helper.Display(productForDisplay, numToDisplay, department);
+                return View(products);
+            }
+            catch (Exception err)
+            {
+                ViewBag.AlertMessage = err.Message;
+                var products = _helper.BringAllProducts();
+                return View(products);
+            }
         }
 
         /// <summary>
@@ -95,7 +106,7 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         public async Task<IActionResult> BuyAction()
         {
-            var products = _context.Products.ToList();
+            var products = _helper.BringAllProducts();
 
             return View(products);
         }
@@ -109,11 +120,9 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> BuyAction(BuyActionClass buyClass)
         {
-            // the products need to be outside the try block because they are used to reset the page 
-            // in failure or success
-            var products = _context.Products.ToList();
             try
             {
+                var products = _helper.BringAllProducts();
                 // check if all the data send from the user are present
                 _helper.CheckValidityOfBuy(buyClass);
 
@@ -139,6 +148,7 @@ namespace Store_chain.Controllers
             catch (Exception err)
             {
                 ViewBag.AlertMessage = err.Message;
+                var products = _helper.BringAllProducts();
                 return View(products);
             }
         }

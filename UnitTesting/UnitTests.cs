@@ -38,6 +38,22 @@ namespace UnitTesting
             //Assert
             CollectionAssert.AllItemsAreNotNull(products);
         }
+
+        [Test]
+        public void UnitTestDepartments()
+        {
+            // Arrange
+
+
+            // Act
+            var departments = _context.Department.ToList();
+
+            var products = departments.SelectMany(x => x.Products).ToList();
+
+            //Assert
+            Assert.That(products != null);
+        }
+
         [TearDown]
         public void TearDown()
         {

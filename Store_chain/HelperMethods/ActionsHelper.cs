@@ -104,7 +104,7 @@ namespace Store_chain.HelperMethods
         }
 
         /// <summary>
-        /// 
+        /// Add products displayed in their respective department in the store
         /// </summary>
         /// <param name="product"></param>
         /// <param name="numToBeDisplayed"></param>
@@ -119,13 +119,13 @@ namespace Store_chain.HelperMethods
 
             toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
 
-            var productDepartment = _context.Departments
+            var productAlreadyInDepartment = _context.Department
                 .FirstOrDefault(x => x.Id == department && x.Products.Any(z => z.Id == product.Id));
 
             // if the connection does not exist create it
-            if (productDepartment == null)
+            if (productAlreadyInDepartment == null)
             {
-                _context.Departments
+                _context.Department
                     .Add(new Department
                     {
                         Id = department,
@@ -139,14 +139,14 @@ namespace Store_chain.HelperMethods
             // else update the number of products in display 
             else
             {
-                productDepartment.Number += numToBeDisplayed;
+                productAlreadyInDepartment.Number += numToBeDisplayed;
 
-                if (productDepartment.Number == product.QuantityInDisplay)
-                    productDepartment.State = (int)DepartmentProductState.Filled;
-                else if (productDepartment.Number > product.QuantityInDisplay)
-                    productDepartment.State = (int)DepartmentProductState.OverFilled;
+                if (productAlreadyInDepartment.Number == product.QuantityInDisplay)
+                    productAlreadyInDepartment.State = (int)DepartmentProductState.Filled;
+                else if (productAlreadyInDepartment.Number > product.QuantityInDisplay)
+                    productAlreadyInDepartment.State = (int)DepartmentProductState.OverFilled;
                 else
-                    productDepartment.State = (int)DepartmentProductState.NeedFilling;
+                    productAlreadyInDepartment.State = (int)DepartmentProductState.NeedFilling;
             }
 
             await _context.SaveChangesAsync();
@@ -256,7 +256,32 @@ namespace Store_chain.HelperMethods
                 throw new Exception("Please select a product");
             if(buyClass.Quantity == 0)
                 throw new Exception("Please give an amount of product you want to buy");
+        }
 
+        public List<Products> BringAllProducts()
+        {
+            var products =
+                (from productSolo in _context.Products
+                 join department in _context.Department
+                        on productSolo.Department equals department.Id
+                    select new Products
+                    {
+                        Id = productSolo.Id,
+                        department = department,
+                        Department = productSolo.Department,
+                        BoughtFromSuppliersCost = productSolo.BoughtFromSuppliersCost,
+                        Category = productSolo.Category,
+                        Description = productSolo.Description,
+                        IsDisplay = productSolo.IsDisplay,
+                        QuantityInDisplay = productSolo.QuantityInDisplay,
+                        QuantityInStorage = productSolo.QuantityInStorage,
+                        SoldToCustomersCost = productSolo.SoldToCustomersCost,
+                        SupplierKey = productSolo.SupplierKey,
+                        TransactionQuantity = productSolo.SupplierKey
+                    }
+                ).ToList();
+
+            return products;
         }
     }
 }

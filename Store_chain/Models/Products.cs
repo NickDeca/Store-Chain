@@ -30,9 +30,8 @@ namespace Store_chain.Models
         public int QuantityInStorage { get; set; }
         [DisplayName("Display Quantity")]
         public int QuantityInDisplay { get; set; }
-        public int DepartmentForeignId { get; set; }
 
-        //[ForeignKey("DepartmentForeignId")]
+        [ForeignKey("Department")]
         public Department department { get;set; }
     }
 }

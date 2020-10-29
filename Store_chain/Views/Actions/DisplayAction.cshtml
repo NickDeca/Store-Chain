@@ -1,8 +1,115 @@
-﻿@model Products
+﻿@model List<Products>
 
 @{
     ViewBag.Title = "title";
     Layout = "_Layout";
 }
+@if (!string.IsNullOrEmpty(ViewBag.AlertMessage))
+{
+    <script>alert("@ViewBag.AlertMessage");</script>
+}
+<table class="table">
 
-<h2>title</h2>
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().SoldToCustomersCost)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Description)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().QuantityInDisplay)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Category)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().TransactionQuantity)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model
+          .GroupBy(x => x.department)
+          .Select(x => new
+          {
+              x.Key,
+              Items = x
+                  .Select(x => x)
+                  .ToList()
+          }))
+        {
+            <dt class="col-sm-2">
+                @Html.DisplayNameFor(model => item.Key.Description)
+            </dt>
+            foreach (var productse in item.Items)
+            {
+
+                @if (productse.IsDisplay)
+                {
+                    <tr>
+                        <form asp-action="BuyAction" method="post">
+                            <td>
+                                <label name="ProductKey">
+                                    @Html.DisplayFor(modelItem => productse.Id)
+                                </label>
+                            </td>
+                            <input type="hidden" name="ProductKey" value="@Html.DisplayFor(modelItem => productse.Id)">
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.SoldToCustomersCost)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.Department)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.QuantityInDisplay)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => productse.Category)
+                            </td>
+                            <td>
+                                <input type="number" name="Quantity" />
+                            </td>
+                            <td>
+                                <input type="submit" value="Display" class="btn" />
+                            </td>
+                        </form>
+                    </tr>
+                }
+            }
+        }
+    </tbody>
+</table>
+<label>
+    <b>New Product To be Displayed</b>
+</label>
+<form asp-action="BuyAction" method="post">
+    <label>
+        Product Id to be Displayed
+    </label>
+    <td>
+        <input type="number" name="ProductKey" />
+    </td>
+    <br />
+    <label>
+        Quantity for Display
+    </label>
+    <td>
+        <input type="number" name="NumToDisplay" />
+    </td>
+    <br />
+    <label>
+        Department To be Displayed In
+    </label>
+    <td>
+        <input type="number" name="Department" />
+    </td>
+    <br />
+    <td>
+        <input type="submit" value="Display" class="btn" />
+    </td>
+</form>
