@@ -145,7 +145,6 @@ namespace Store_chain.HelperMethods
             {
                 productAlreadyInDepartment.Number += numToBeDisplayed;
 
-                //TODO change to MaxDisplay
                 if (productAlreadyInDepartment.Number == product.MaxDisplay)
                     productAlreadyInDepartment.State = (int)DepartmentProductState.Filled;
                 else if (productAlreadyInDepartment.Number > product.MaxDisplay)
@@ -175,7 +174,7 @@ namespace Store_chain.HelperMethods
             // begin the transaction 
             await using (var transaction = _context.Database.BeginTransaction())
             {
-                try
+                try //TODO I can remove this 
                 {
                     buyer.Capital -= summedValue;
 
@@ -198,6 +197,8 @@ namespace Store_chain.HelperMethods
                     {
                         // update the customer with the new capital after paying
                         _context.Customers.Update(buyer);
+
+                        await UpdateProductInDisplay(product);
 
                         // create another entry in the transactions, with all the info needed to be recognized
                         // subset of the major 
@@ -248,7 +249,12 @@ namespace Store_chain.HelperMethods
 
         public async Task UpdateProductInDisplay(Products productBought)
         {
-            //TODO From Buy Remove some products in Display // Check if correct
+            var departmentConnection = _context.Department.FirstOrDefault(x => x.Prod_Id == productBought.Id);
+
+            if(departmentConnection == null)
+                throw new Exception();
+            departmentConnection.Number -= productBought.TransactionQuantity;
+
             productBought.QuantityInDisplay -= productBought.TransactionQuantity;
             _context.SaveChanges();
         }
