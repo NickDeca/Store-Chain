@@ -51,7 +51,8 @@ namespace Store_chain.HelperMethods
                 UpdateProductInStorage(product, supplierKey, productQuantity);
 
                 transaction.Capital = boughtValue;
-                await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync(); //TODO auto mporei na figei gt dn kanoume add transaction alla pio katw kanoume 
+
                 transaction.State = (int)StateEnum.OkState;
                 transactionManager.AddTransaction(transaction);
 
@@ -112,26 +113,29 @@ namespace Store_chain.HelperMethods
         /// <returns></returns>
         public async Task Display(Products product, int numToBeDisplayed, int department)
         {
+            //Check if product passed is in the database
             var toBeSavedProduct = _context.Products.Find(product);
 
             if (toBeSavedProduct == null)
                 throw new Exception("No such Product in the database");
 
+            // up the number of displayed 
             toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
 
+            // check if connected with the department 
             var productAlreadyInDepartment = _context.Department
                 .FirstOrDefault(x => x.Id == department && x.Prod_Id == product.Id);
 
-            // if the connection does not exist create it
+            // if the connection does not exist, create it
             if (productAlreadyInDepartment == null)
             {
                 _context.Department
                     .Add(new Department
                     {
-                        Id = department,
+                        DepartmentKey = department,
                         Description = product.Description,
                         Number = numToBeDisplayed,
-                        State = product.QuantityInDisplay == numToBeDisplayed
+                        State = product.MaxDisplay == numToBeDisplayed
                             ? (int)DepartmentProductState.Filled
                             : (int)DepartmentProductState.NeedFilling
                     });
@@ -141,9 +145,10 @@ namespace Store_chain.HelperMethods
             {
                 productAlreadyInDepartment.Number += numToBeDisplayed;
 
-                if (productAlreadyInDepartment.Number == product.QuantityInDisplay)
+                //TODO change to MaxDisplay
+                if (productAlreadyInDepartment.Number == product.MaxDisplay)
                     productAlreadyInDepartment.State = (int)DepartmentProductState.Filled;
-                else if (productAlreadyInDepartment.Number > product.QuantityInDisplay)
+                else if (productAlreadyInDepartment.Number > product.MaxDisplay)
                     productAlreadyInDepartment.State = (int)DepartmentProductState.OverFilled;
                 else
                     productAlreadyInDepartment.State = (int)DepartmentProductState.NeedFilling;

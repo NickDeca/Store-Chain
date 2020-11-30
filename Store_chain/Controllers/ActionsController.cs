@@ -50,6 +50,7 @@ namespace Store_chain.Controllers
                 if (productForSupply == null)
                     throw new Exception("Product was not found!");
 
+                // TODO not quantity in storage but quantity to supply or transaction quantity !!!!
                 await _helper.Supply(supplierKey, productForSupply, quantityInStorage);
 
             }
