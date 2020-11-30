@@ -252,7 +252,7 @@ namespace Store_chain.HelperMethods
             var departmentConnection = _context.Department.FirstOrDefault(x => x.Prod_Id == productBought.Id);
 
             if(departmentConnection == null)
-                throw new Exception();
+                throw new Exception("Connection in department by product id was not found");
             departmentConnection.Number -= productBought.TransactionQuantity;
 
             productBought.QuantityInDisplay -= productBought.TransactionQuantity;
@@ -278,7 +278,7 @@ namespace Store_chain.HelperMethods
                     select new Products
                     {
                         Id = productSolo.Id,
-                        department = department,
+                        department = department, //TODO Department problem again
                         Department = productSolo.Department,
                         BoughtFromSuppliersCost = productSolo.BoughtFromSuppliersCost,
                         Category = productSolo.Category,
