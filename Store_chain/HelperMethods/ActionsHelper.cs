@@ -174,52 +174,43 @@ namespace Store_chain.HelperMethods
             // begin the transaction 
             await using (var transaction = _context.Database.BeginTransaction())
             {
-                try //TODO I can remove this 
+                buyer.Capital -= summedValue;
+
+                // Create a new transaction about
+                // who bought
+                // what time did the transaction take place
+                // the amount the customer is buying
+                // set the transaction level to major and the errors to non
+                var customerFullTransaction =
+                    transactionManager.AddTransaction(new Transactions
+                    {
+                        RecipientKey = buyer.Id,
+                        ProductKey = product.Id,
+                        DateOfTransaction = timeOfTransaction,
+                        Capital = summedValue,
+                        ErrorText = string.Empty
+                    });
+
+                try
                 {
-                    buyer.Capital -= summedValue;
+                    // update the customer with the new capital after paying
+                    _context.Customers.Update(buyer);
 
-                    // Create a new transaction about
-                    // who bought
-                    // what time did the transaction take place
-                    // the amount the customer is buying
-                    // set the transaction level to major and the errors to non
-                    var customerFullTransaction =
-                        transactionManager.AddTransaction(new Transactions
-                        {
-                            RecipientKey = buyer.Id,
-                            ProductKey = product.Id,
-                            DateOfTransaction = timeOfTransaction,
-                            Capital = summedValue,
-                            ErrorText = string.Empty
-                        });
+                    await UpdateProductInDisplay(product);
 
-                    try
-                    {
-                        // update the customer with the new capital after paying
-                        _context.Customers.Update(buyer);
-
-                        await UpdateProductInDisplay(product);
-
-                        // create another entry in the transactions, with all the info needed to be recognized
-                        // subset of the major 
-                        customerFullTransaction.ProductQuantity = product.TransactionQuantity;
-                        customerFullTransaction.ErrorText = "OK!";
-                        customerFullTransaction.State = (int) StateEnum.OkState;
-                    }
-                    catch (Exception error)
-                    {
-                        customerFullTransaction.State = (int)StateEnum.ErrorState;
-                        customerFullTransaction.ErrorText = error.Message;
-                        throw;
-                    }
-                    // _context.StoreDepartments.Remove(department ?? throw new Exception($"Product with Id:{product.Id} does not exist in Department"));
-
+                    // create another entry in the transactions, with all the info needed to be recognized
+                    // subset of the major 
+                    customerFullTransaction.ProductQuantity = product.TransactionQuantity;
+                    customerFullTransaction.ErrorText = "OK!";
                     customerFullTransaction.State = (int)StateEnum.OkState;
                 }
-                catch (Exception e)
+                catch (Exception error)
                 {
-                    throw new Exception(e.Message);
+                    customerFullTransaction.State = (int)StateEnum.ErrorState;
+                    customerFullTransaction.ErrorText = error.Message;
+                    throw;
                 }
+
                 await CheckIfNeedReSupply(product.toListFromOne());
 
                 _context.CentralStoreCapital.Add(new CentralStoreCapital { Capital = summedValue, TransactionKey = 0 });
@@ -251,7 +242,7 @@ namespace Store_chain.HelperMethods
         {
             var departmentConnection = _context.Department.FirstOrDefault(x => x.Prod_Id == productBought.Id);
 
-            if(departmentConnection == null)
+            if (departmentConnection == null)
                 throw new Exception("Connection in department by product id was not found");
             departmentConnection.Number -= productBought.TransactionQuantity;
 
@@ -263,9 +254,9 @@ namespace Store_chain.HelperMethods
         {
             if (buyClass.CustomerKey == 0)
                 throw new Exception("Please select a customer");
-            if(buyClass.ProductKey == 0)
+            if (buyClass.ProductKey == 0)
                 throw new Exception("Please select a product");
-            if(buyClass.Quantity == 0)
+            if (buyClass.Quantity == 0)
                 throw new Exception("Please give an amount of product you want to buy");
         }
 
@@ -275,21 +266,21 @@ namespace Store_chain.HelperMethods
                 (from productSolo in _context.Products
                  join department in _context.Department
                         on productSolo.Department equals department.Id
-                    select new Products
-                    {
-                        Id = productSolo.Id,
-                        department = department, //TODO Department problem again
-                        Department = productSolo.Department,
-                        BoughtFromSuppliersCost = productSolo.BoughtFromSuppliersCost,
-                        Category = productSolo.Category,
-                        Description = productSolo.Description,
-                        IsDisplay = productSolo.IsDisplay,
-                        QuantityInDisplay = productSolo.QuantityInDisplay,
-                        QuantityInStorage = productSolo.QuantityInStorage,
-                        SoldToCustomersCost = productSolo.SoldToCustomersCost,
-                        SupplierKey = productSolo.SupplierKey,
-                        TransactionQuantity = productSolo.SupplierKey
-                    }
+                 select new Products
+                 {
+                     Id = productSolo.Id,
+                     department = department, //TODO Department problem again
+                     Department = productSolo.Department,
+                     BoughtFromSuppliersCost = productSolo.BoughtFromSuppliersCost,
+                     Category = productSolo.Category,
+                     Description = productSolo.Description,
+                     IsDisplay = productSolo.IsDisplay,
+                     QuantityInDisplay = productSolo.QuantityInDisplay,
+                     QuantityInStorage = productSolo.QuantityInStorage,
+                     SoldToCustomersCost = productSolo.SoldToCustomersCost,
+                     SupplierKey = productSolo.SupplierKey,
+                     TransactionQuantity = productSolo.SupplierKey
+                 }
                 ).ToList();
 
             return products;
