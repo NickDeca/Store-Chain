@@ -30,10 +30,10 @@ namespace Store_chain.Models
         public int QuantityInStorage { get; set; }
         [DisplayName("Display Quantity")]
         public int QuantityInDisplay { get; set; }
+
         [DisplayName("Maximum Display Quantity")]
         public int MaxDisplay { get; set; }
 
-        [ForeignKey("Department")]
         public Department department { get;set; }
     }
 }

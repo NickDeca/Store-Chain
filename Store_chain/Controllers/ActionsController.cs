@@ -33,15 +33,13 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         public async Task<IActionResult> SupplyAction(int? id)
         {
-            if (id == null) return NotFound();
-
             var product = await _context.Products.FindAsync(id);
             return View(product);
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> SupplyAction([Bind("SupplierKey,Id,QuantityInStorage")] int supplierKey, int id, int quantityInStorage)
+        public async Task<IActionResult> SupplyAction([Bind("SupplierKey,Id,TransactionQuantity")] int supplierKey, int id, int transactionQuantity)
         {
             try
             {
@@ -50,8 +48,7 @@ namespace Store_chain.Controllers
                 if (productForSupply == null)
                     throw new Exception("Product was not found!");
 
-                // TODO not quantity in storage but quantity to supply or transaction quantity !!!!
-                await _helper.Supply(supplierKey, productForSupply, quantityInStorage);
+                await _helper.Supply(supplierKey, productForSupply, transactionQuantity);
 
             }
             catch (Exception error)
@@ -68,8 +65,6 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         public async Task<IActionResult> DisplayAction(int? id)
         {
-            if (id == null) return NotFound();
-
             var products = _helper.BringAllProducts();
 
             return View(products);
@@ -85,8 +80,7 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DisplayAction([Bind("ProductKey,NumToDisplay,Department,DisplayAction")] int productKey, int numToDisplay, int department
-            , string displayBtn)
+        public async Task<IActionResult> DisplayAction([Bind("ProductKey,NumToDisplay,Department")] int productKey, int numToDisplay, int department)
         {
             try
             {

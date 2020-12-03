@@ -262,28 +262,17 @@ namespace Store_chain.HelperMethods
 
         public List<Products> BringAllProducts()
         {
-            var products =
-                (from productSolo in _context.Products
-                 join department in _context.Department
-                        on productSolo.Department equals department.Id
-                 select new Products
-                 {
-                     Id = productSolo.Id,
-                     department = department, //TODO Department problem again
-                     Department = productSolo.Department,
-                     BoughtFromSuppliersCost = productSolo.BoughtFromSuppliersCost,
-                     Category = productSolo.Category,
-                     Description = productSolo.Description,
-                     IsDisplay = productSolo.IsDisplay,
-                     QuantityInDisplay = productSolo.QuantityInDisplay,
-                     QuantityInStorage = productSolo.QuantityInStorage,
-                     SoldToCustomersCost = productSolo.SoldToCustomersCost,
-                     SupplierKey = productSolo.SupplierKey,
-                     TransactionQuantity = productSolo.SupplierKey
-                 }
-                ).ToList();
+            try
+            {
+                var products = _context.Products.Select(x => x).ToList();
 
-            return products;
+                return products;
+            }
+            catch (Exception err)
+            {
+                throw err;
+            }
+
         }
     }
 }

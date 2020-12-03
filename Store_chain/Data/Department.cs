@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Store_chain.Models;
 
@@ -10,6 +11,8 @@ namespace Store_chain.Data
     /// </summary>
     public class Department
     {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public int Id { get; set; }
         // Description of the Department
         public string Description { get; set; }
