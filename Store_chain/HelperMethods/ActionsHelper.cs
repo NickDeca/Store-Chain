@@ -33,6 +33,13 @@ namespace Store_chain.HelperMethods
             var timeOfTransaction = DateTime.Now;
             var transactionManager = new TransactionManager(_context);
 
+            var departConn = _context.Department.FirstOrDefault(x => x.Prod_Id == product.Id);
+            if (departConn == null)
+                throw new Exception("No Department Connection");
+            if (departConn.State == (int)DepartmentProductState.Filled || departConn.State == (int)DepartmentProductState.OverFilled)
+                throw new Exception("Cannot take more products");
+        
+
             var transaction = new Transactions
             {
                 RecipientKey = supplierKey,
@@ -48,7 +55,7 @@ namespace Store_chain.HelperMethods
 
                 UpdateSuppliersDue(supplierKey, boughtValue);
 
-                UpdateProductInStorage(product, supplierKey, productQuantity);
+                UpdateProductInStorage(product, supplierKey, productQuantity, departConn);
 
                 transaction.Capital = boughtValue;
                 await _context.SaveChangesAsync(); //TODO auto mporei na figei gt dn kanoume add transaction alla pio katw kanoume 
@@ -94,14 +101,18 @@ namespace Store_chain.HelperMethods
         /// <param name="product"></param>
         /// <param name="supplierKey"></param>
         /// <param name="productQuantity"></param>
-        public void UpdateProductInStorage(Products product, int supplierKey, int productQuantity)
+        public void UpdateProductInStorage(Products product, int supplierKey, int productQuantity, Department departConn)
         {
             if (product.SupplierKey != supplierKey)
                 throw new Exception("The specified supplier does not contain the product");
 
+
+            departConn.State = (int)DepartmentProductState.Filled;
+
             product.QuantityInStorage += productQuantity;
 
             _context.Products.Update(product);
+            _context.Department.Update(departConn);
         }
 
         /// <summary>
@@ -196,7 +207,7 @@ namespace Store_chain.HelperMethods
                     // update the customer with the new capital after paying
                     _context.Customers.Update(buyer);
 
-                    await UpdateProductInDisplay(product);
+                    await UpdateProductInDisplay(product, _context.Department.FirstOrDefault(x => x.Prod_Id == product.Id));
 
                     // create another entry in the transactions, with all the info needed to be recognized
                     // subset of the major 
@@ -238,7 +249,7 @@ namespace Store_chain.HelperMethods
                 .ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
 
-        public async Task UpdateProductInDisplay(Products productBought)
+        public async Task UpdateProductInDisplay(Products productBought, Department departConn)
         {
             var departmentConnection = _context.Department.FirstOrDefault(x => x.Prod_Id == productBought.Id);
 
@@ -247,6 +258,8 @@ namespace Store_chain.HelperMethods
             departmentConnection.Number -= productBought.TransactionQuantity;
 
             productBought.QuantityInDisplay -= productBought.TransactionQuantity;
+            departConn.Number -= productBought.TransactionQuantity;
+
             _context.SaveChanges();
         }
 

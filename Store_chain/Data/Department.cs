@@ -17,6 +17,8 @@ namespace Store_chain.Data
         // Description of the Department
         public string Description { get; set; }
         public int? DepartmentKey { get; set; }
+
+        // Number of products in display
         public int? Number { get; set; }
         public int State { get; set; }
         [DisplayName("Product Id")]
