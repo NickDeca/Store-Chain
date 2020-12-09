@@ -33,6 +33,8 @@ namespace Store_chain.Models
 
         [DisplayName("Maximum Display Quantity")]
         public int MaxDisplay { get; set; }
+        [DisplayName("Minimum Storage Quantity")]
+        public int MinStorage { get; set; }
 
         public Department department { get;set; }
     }

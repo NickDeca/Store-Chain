@@ -57,11 +57,12 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,SupplierKey,Category,Department,Description,IsDisplay,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay")] Products products)
+        public async Task<IActionResult> Create([Bind("Id,SupplierKey,Category,Department,Description,IsDisplay,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay,MinStorage")] Products products)
         {
             if (ModelState.IsValid)
             {
                 _context.Add(products);
+                _context.MinQuantities.Add(new ProductMinQuantity{ProductKey = products.Id, MinDisplay = products.MaxDisplay, MinStorage = products.MinStorage});
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }
@@ -89,7 +90,7 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,SupplierKey,Category,Department,Description,IsDisplay,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay")] Products products)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,SupplierKey,Category,Department,Description,IsDisplay,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay,MinStorage")] Products products)
         {
             if (id != products.Id)
             {
