@@ -49,14 +49,16 @@ namespace Store_chain.Controllers
                     throw new Exception("Product was not found!");
 
                 await _helper.Supply(supplierKey, productForSupply, transactionQuantity);
+                return View();
 
             }
             catch (Exception error)
             {
-                ModelState.AddModelError("SupplierKey", $"{Environment.NewLine}{error.Message}");
+                //ModelState.AddModelError("SupplierKey", $"{Environment.NewLine}{error.Message}");
+                ViewBag.AlertMessage = error.Message;
+                return View();
             }
 
-            return View();
         }
 
         /// <summary>
@@ -86,7 +88,6 @@ namespace Store_chain.Controllers
             {
                 var products = _helper.BringAllProducts();
                 var productForDisplay = _context.Products.FirstOrDefault(x => x.Id == productKey);
-                //TODO displayAction for exception handling
                 await _helper.Display(productForDisplay, numToDisplay, department);
 
                 return View(products);
@@ -140,7 +141,6 @@ namespace Store_chain.Controllers
                 if (customer == null)
                     throw new Exception("Customer not found retry!");
 
-                await _helper.UpdateProductInDisplay(productBought);
                 await _helper.Buy(productBought, customer);
                 return View(products);
             }

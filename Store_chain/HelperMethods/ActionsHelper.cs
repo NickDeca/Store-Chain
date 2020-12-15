@@ -32,14 +32,8 @@ namespace Store_chain.HelperMethods
         {
             var timeOfTransaction = DateTime.Now;
             var transactionManager = new TransactionManager(_context);
-
-            var departConn = _context.Department.FirstOrDefault(x => x.Prod_Id == product.Id);
-            if (departConn == null)
-                throw new Exception("No Department Connection");
-            if (departConn.State == (int)DepartmentProductState.Filled || departConn.State == (int)DepartmentProductState.OverFilled)
-                throw new Exception("Cannot take more products");
-        
-
+            
+            // the transaction of paying the supplier
             var transaction = new Transactions
             {
                 RecipientKey = supplierKey,
@@ -55,10 +49,9 @@ namespace Store_chain.HelperMethods
 
                 UpdateSuppliersDue(supplierKey, boughtValue);
 
-                UpdateProductInStorage(product, supplierKey, productQuantity, departConn);
+                UpdateProductInStorage(product, supplierKey, productQuantity);
 
                 transaction.Capital = boughtValue;
-                await _context.SaveChangesAsync(); //TODO auto mporei na figei gt dn kanoume add transaction alla pio katw kanoume 
 
                 transaction.State = (int)StateEnum.OkState;
                 transactionManager.AddTransaction(transaction);
@@ -101,18 +94,17 @@ namespace Store_chain.HelperMethods
         /// <param name="product"></param>
         /// <param name="supplierKey"></param>
         /// <param name="productQuantity"></param>
-        public void UpdateProductInStorage(Products product, int supplierKey, int productQuantity, Department departConn)
+        public void UpdateProductInStorage(Products product, int supplierKey, int productQuantity)
         {
             if (product.SupplierKey != supplierKey)
                 throw new Exception("The specified supplier does not contain the product");
-
-
-            departConn.State = (int)DepartmentProductState.Filled;
+            
+            //departConn.State = (int)DepartmentProductState.Filled;
 
             product.QuantityInStorage += productQuantity;
 
             _context.Products.Update(product);
-            _context.Department.Update(departConn);
+            _context.SaveChanges();
         }
 
         /// <summary>
@@ -191,11 +183,11 @@ namespace Store_chain.HelperMethods
                 // who bought
                 // what time did the transaction take place
                 // the amount the customer is buying
-                // set the transaction level to major and the errors to non
                 var customerFullTransaction =
                     transactionManager.AddTransaction(new Transactions
                     {
-                        RecipientKey = buyer.Id,
+                        RecipientKey = 0, 
+                        ProviderKey = buyer.Id,
                         ProductKey = product.Id,
                         DateOfTransaction = timeOfTransaction,
                         Capital = summedValue,

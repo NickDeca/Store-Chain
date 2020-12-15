@@ -23,7 +23,7 @@ namespace Store_chain.Data
         public int State { get; set; }
         [DisplayName("Product Id")]
         public int Prod_Id { get; set; }
-        //TODO remove
+        //TODO remove if unes
         [ForeignKey("DepartmentForeignId")]
         public List<Products> Products { get; set; }
     }
