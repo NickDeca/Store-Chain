@@ -17,61 +17,61 @@ namespace Store_chain.Data
 
         public Transactions AddTransaction(Transactions transaction)
         {
-            _context.Add(transaction);
+            _context.Transactions.Add(transaction);
             _context.SaveChanges();
             return GetTransaction(transaction.RecipientKey, transaction.ProviderKey, transaction.ProductKey, transaction.DateOfTransaction);
         }
 
         public Transactions GetTransaction(int recipient, int provider, int? product, DateTime dateTransaction)
         {
-            return _context.transactionTable
+            var value = _context.Transactions
                 .FirstOrDefault(x => x.RecipientKey == recipient &&
                                      x.ProviderKey == provider &&
                                      x.ProductKey == product &&
-                                     x.DateOfTransaction == dateTransaction &&
-                                     x.State != (int)StateEnum.ErrorState);
+                                     x.DateOfTransaction == dateTransaction);
+
+            return value;
         }
 
         public Transactions GetTransaction(Transactions transaction)
         {
-            return _context.transactionTable
+            return _context.Transactions
                 .FirstOrDefault(x => x.RecipientKey == transaction.RecipientKey &&
                                      x.ProviderKey == transaction.ProviderKey &&
                                      x.ProductKey == transaction.ProductKey &&
-                                     x.DateOfTransaction == transaction.DateOfTransaction &&
-                                     x.State != (int)StateEnum.ErrorState);
+                                     x.DateOfTransaction == transaction.DateOfTransaction);
         }
 
         public void AddTransactionRange(List<Transactions> transactions)
         {
-            _context.transactionTable.AddRange(transactions);
+            _context.Transactions.AddRange(transactions);
             _context.SaveChanges();
         }
 
         public IEnumerable<Transactions> GeTransactionsByCustomer(int recipient)
         {
-            return _context.transactionTable
+            return _context.Transactions
                 .Where(x => x.RecipientKey == recipient &&
                             x.State != (int)StateEnum.ErrorState);
         }
 
         public IEnumerable<Transactions> GeTransactionsByProvider(int provider)
         {
-            return _context.transactionTable
+            return _context.Transactions
                 .Where(x => x.ProviderKey == provider &&
                             x.State != (int)StateEnum.ErrorState);
         }
 
         public IEnumerable<Transactions> GeTransactionsByProduct(int product)
         {
-            return _context.transactionTable
+            return _context.Transactions
                 .Where(x => x.ProductKey == product &&
                             x.State != (int)StateEnum.ErrorState);
         }
 
         public Transactions GeTransactionsById(int transactionKey)
         {
-            return _context.transactionTable
+            return _context.Transactions
                 .FirstOrDefault(x => x.Id == transactionKey);
         }
     }

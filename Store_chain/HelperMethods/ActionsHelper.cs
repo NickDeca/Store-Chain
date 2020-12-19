@@ -32,7 +32,7 @@ namespace Store_chain.HelperMethods
         {
             var timeOfTransaction = DateTime.Now;
             var transactionManager = new TransactionManager(_context);
-            
+
             // the transaction of paying the supplier
             var transaction = new Transactions
             {
@@ -98,7 +98,7 @@ namespace Store_chain.HelperMethods
         {
             if (product.SupplierKey != supplierKey)
                 throw new Exception("The specified supplier does not contain the product");
-            
+
             //departConn.State = (int)DepartmentProductState.Filled;
 
             product.QuantityInStorage += productQuantity;
@@ -186,20 +186,23 @@ namespace Store_chain.HelperMethods
                 var customerFullTransaction =
                     transactionManager.AddTransaction(new Transactions
                     {
-                        RecipientKey = 0, 
+                        RecipientKey = 0,
                         ProviderKey = buyer.Id,
                         ProductKey = product.Id,
                         DateOfTransaction = timeOfTransaction,
+                        State = (int)StateEnum.UndeterminedState,
                         Capital = summedValue,
                         ErrorText = string.Empty
                     });
 
+                if (customerFullTransaction == null)
+                    throw new Exception("transaction manager has encountered a problem");
                 try
                 {
                     // update the customer with the new capital after paying
                     _context.Customers.Update(buyer);
 
-                    await UpdateProductInDisplay(product, _context.Department.FirstOrDefault(x => x.Prod_Id == product.Id));
+                    await UpdateProductInDisplay(product);
 
                     // create another entry in the transactions, with all the info needed to be recognized
                     // subset of the major 
@@ -228,7 +231,7 @@ namespace Store_chain.HelperMethods
         {
             var productsFromDepartments =
                 (from product in products
-                 join minQuantity in _context.MinQuantities
+                 join minQuantity in _context.ProductMinQuantity
                      on product.Id equals minQuantity.id
                  where product.QuantityInStorage < minQuantity.MinStorage
                  select new
@@ -237,11 +240,12 @@ namespace Store_chain.HelperMethods
                      QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
                  }).ToList();
 
-            await Task.Run(() => productsFromDepartments
-                .ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
+            if (productsFromDepartments.Any())
+                await Task.Run(() => productsFromDepartments
+                    .ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
 
-        public async Task UpdateProductInDisplay(Products productBought, Department departConn)
+        public async Task UpdateProductInDisplay(Products productBought)
         {
             var departmentConnection = _context.Department.FirstOrDefault(x => x.Prod_Id == productBought.Id);
 
@@ -250,7 +254,6 @@ namespace Store_chain.HelperMethods
             departmentConnection.Number -= productBought.TransactionQuantity;
 
             productBought.QuantityInDisplay -= productBought.TransactionQuantity;
-            departConn.Number -= productBought.TransactionQuantity;
 
             _context.SaveChanges();
         }

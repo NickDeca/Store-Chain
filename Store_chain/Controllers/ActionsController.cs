@@ -121,7 +121,7 @@ namespace Store_chain.Controllers
         public async Task<IActionResult> BuyAction(BuyActionClass buyClass)
         {
             try
-            {
+            { //TODO sto customers na exei kai to id
                 var products = _helper.BringAllProducts();
                 // check if all the data send from the user are present
                 _helper.CheckValidityOfBuy(buyClass);

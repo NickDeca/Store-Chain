@@ -62,7 +62,7 @@ namespace Store_chain.Controllers
             if (ModelState.IsValid)
             {
                 _context.Add(products);
-                _context.MinQuantities.Add(new ProductMinQuantity{ProductKey = products.Id, MinDisplay = products.MaxDisplay, MinStorage = products.MinStorage});
+                _context.ProductMinQuantity.Add(new ProductMinQuantity{ProductKey = products.Id, MinDisplay = products.MaxDisplay, MinStorage = products.MinStorage});
                 await _context.SaveChangesAsync();
                 return RedirectToAction(nameof(Index));
             }

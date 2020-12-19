@@ -22,10 +22,10 @@ namespace Store_chain.DataLayer
         public virtual DbSet<Customers> Customers { get; set; }
         public virtual DbSet<Employees> Employees { get; set; }
         public virtual DbSet<Department> Department { get; set; }
-        public virtual DbSet<Transactions> transactionTable { get; set; }
+        public virtual DbSet<Transactions> Transactions { get; set; }
         public virtual DbSet<Products> Products { get; set; }
         public virtual DbSet<Suppliers> Suppliers { get; set; }
-        public virtual DbSet<ProductMinQuantity> MinQuantities { get; set; }
+        public virtual DbSet<ProductMinQuantity> ProductMinQuantity { get; set; }
         public virtual DbSet<CentralStoreCapital> CentralStoreCapital { get; set; }
     }
 }
