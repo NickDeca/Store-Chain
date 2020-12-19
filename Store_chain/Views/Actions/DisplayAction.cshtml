@@ -22,7 +22,7 @@
                 @Html.DisplayNameFor(model => model.First().Description)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.First().QuantityInDisplay)
+                @Html.DisplayNameFor(model => model.First().QuantityInStorage)
             </th>
             <th>
                 @Html.DisplayNameFor(model => model.First().Category)
@@ -68,7 +68,7 @@
                         </td>
                         <input type="hidden" name="Department" value="@Html.DisplayFor(modelItem => productse.Department)">
                         <td>
-                            @Html.DisplayFor(modelItem => productse.QuantityInDisplay)
+                            @Html.DisplayFor(modelItem => productse.QuantityInStorage)
                         </td>
                         <td>
                             @Html.DisplayFor(modelItem => productse.Category)
