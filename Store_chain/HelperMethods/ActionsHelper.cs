@@ -110,53 +110,60 @@ namespace Store_chain.HelperMethods
         /// <summary>
         /// Add products displayed in their respective department in the store
         /// </summary>
-        /// <param name="product"></param>
+        /// <param name="productKey"></param>
         /// <param name="numToBeDisplayed"></param>
         /// <param name="department"></param>
         /// <returns></returns>
-        public async Task Display(Products product, int numToBeDisplayed, int department)
+        public async Task Display(int productKey, int numToBeDisplayed, int department)
         {
             //Check if product passed is in the database
-            var toBeSavedProduct = _context.Products.Find(product);
+            var toBeSavedProduct = _context.Products.FirstOrDefault(x => x.Id == productKey);
 
             if (toBeSavedProduct == null)
                 throw new Exception("No such Product in the database");
-
-            // up the number of displayed 
-            toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
-
-            // check if connected with the department 
-            var productAlreadyInDepartment = _context.Department
-                .FirstOrDefault(x => x.Id == department && x.Prod_Id == product.Id);
-
-            // if the connection does not exist, create it
-            if (productAlreadyInDepartment == null)
+            await using (var transaction = _context.Database.BeginTransaction())
             {
-                _context.Department
-                    .Add(new Department
+                // up the number of displayed 
+                toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
+
+                toBeSavedProduct.QuantityInDisplay -= numToBeDisplayed;
+
+                // check if connected with the department 
+                var productAlreadyInDepartment = _context.Department
+                    .FirstOrDefault(x => x.Id == department && x.Prod_Id == toBeSavedProduct.Id);
+
+                _context.Products.Update(toBeSavedProduct);
+
+                // if the connection does not exist, create it
+                if (productAlreadyInDepartment == null)
+                {
+                    var newConn = new Department
                     {
                         DepartmentKey = department,
-                        Description = product.Description,
+                        Description = toBeSavedProduct.Description,
                         Number = numToBeDisplayed,
-                        State = product.MaxDisplay == numToBeDisplayed
-                            ? (int)DepartmentProductState.Filled
-                            : (int)DepartmentProductState.NeedFilling
-                    });
-            }
-            // else update the number of products in display 
-            else
-            {
-                productAlreadyInDepartment.Number += numToBeDisplayed;
-
-                if (productAlreadyInDepartment.Number == product.MaxDisplay)
-                    productAlreadyInDepartment.State = (int)DepartmentProductState.Filled;
-                else if (productAlreadyInDepartment.Number > product.MaxDisplay)
-                    productAlreadyInDepartment.State = (int)DepartmentProductState.OverFilled;
+                        State = toBeSavedProduct.MaxDisplay == numToBeDisplayed
+                            ? (int) DepartmentProductState.Filled
+                            : (int) DepartmentProductState.NeedFilling
+                    };
+                    _context.Department.Add(newConn);
+                }
+                // else update the number of products in display 
                 else
-                    productAlreadyInDepartment.State = (int)DepartmentProductState.NeedFilling;
-            }
+                {
+                    productAlreadyInDepartment.Number += numToBeDisplayed;
 
-            await _context.SaveChangesAsync();
+                    if (productAlreadyInDepartment.Number == toBeSavedProduct.MaxDisplay)
+                        productAlreadyInDepartment.State = (int)DepartmentProductState.Filled;
+                    else if (productAlreadyInDepartment.Number > toBeSavedProduct.MaxDisplay)
+                        productAlreadyInDepartment.State = (int)DepartmentProductState.OverFilled;
+                    else
+                        productAlreadyInDepartment.State = (int)DepartmentProductState.NeedFilling;
+                }
+
+                _context.SaveChanges();
+                await transaction.CommitAsync();
+            }
         }
 
         public async Task Buy(Products product, Customers buyer)

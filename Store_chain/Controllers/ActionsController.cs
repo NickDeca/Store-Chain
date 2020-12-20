@@ -87,8 +87,7 @@ namespace Store_chain.Controllers
             try
             {
                 var products = _helper.BringAllProducts();
-                var productForDisplay = _context.Products.FirstOrDefault(x => x.Id == productKey);
-                await _helper.Display(productForDisplay, numToDisplay, department);
+                await _helper.Display(productKey, numToDisplay, department);
 
                 return View(products);
             }
