@@ -39,8 +39,11 @@ namespace Store_chain.HelperMethods
                 RecipientKey = supplierKey,
                 ProviderKey = 0, // 0 is the shop
                 DateOfTransaction = timeOfTransaction,
+                ProductKey = product.Id,
+                ProductQuantity = productQuantity,
                 ErrorText = string.Empty,
-                State = (int)StateEnum.UndeterminedState
+                State = (int)StateEnum.UndeterminedState,
+                Type = "Bought from supplier"
             };
 
             await using (var t = _context.Database.BeginTransaction())
@@ -77,6 +80,8 @@ namespace Store_chain.HelperMethods
 
                     throw error;
                 }
+
+                _context.SaveChanges();
                 await t.CommitAsync();
             }
         }
@@ -208,7 +213,8 @@ namespace Store_chain.HelperMethods
                         DateOfTransaction = timeOfTransaction,
                         State = (int)StateEnum.UndeterminedState,
                         Capital = summedValue,
-                        ErrorText = string.Empty
+                        ErrorText = string.Empty,
+                        Type = "Sold to customer"
                     });
 
                 if (customerFullTransaction == null)

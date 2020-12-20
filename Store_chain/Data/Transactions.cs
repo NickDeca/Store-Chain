@@ -18,5 +18,7 @@ namespace Store_chain.Data
         public int? ProductQuantity { get; set; }
         public int? State { get; set; }
         public string ErrorText { get; set; }
+
+        public string Type { get; set; }
     }
 }

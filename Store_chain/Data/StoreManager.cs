@@ -19,15 +19,17 @@ namespace Store_chain.Data
             TransactionManager transactionManager = new TransactionManager(_context);
 
             // Get last row in the Store table
-            var lastStoreCapital = _context.CentralStoreCapital.LastOrDefault();
+            var lastStoreCapital = _context.CentralStoreCapital.OrderByDescending(s => s.Id).FirstOrDefault();
 
             Transactions transaction = transactionManager.GeTransactionsById(transactionKey);
 
             // If not the first ever made entity in Store
             if (lastStoreCapital != null)
             {
+                if(lastStoreCapital.Capital < capital && operation == StoreCalculationEnum.Subtraction)
+                    throw new Exception($"Cannot buy more than the capital of the store {lastStoreCapital.Capital}");
                 // the last row in StoreCapital is the Final sum in the Store's capital and the transactionKey is the last responsible transaction that changed it
-                var finalSum = operation == 0 ? lastStoreCapital.Capital - capital : lastStoreCapital.Capital + capital;
+                var finalSum = operation == StoreCalculationEnum.Subtraction ? lastStoreCapital.Capital - capital : lastStoreCapital.Capital + capital;
 
                 _context.CentralStoreCapital.Add(new CentralStoreCapital
                 {
@@ -49,6 +51,7 @@ namespace Store_chain.Data
                     ProductQuantity = 0,
                     State = (int)StateEnum.OkState,
                     ErrorText = string.Empty,
+                    Type = "First"
                 };
                 try
                 {

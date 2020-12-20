@@ -33,8 +33,8 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         public async Task<IActionResult> SupplyAction(int? id)
         {
-            var product = await _context.Products.FindAsync(id);
-            return View(product);
+            //var product = await _context.Products.FindAsync(id);
+            return View();
         }
 
         [HttpPost]
@@ -49,16 +49,13 @@ namespace Store_chain.Controllers
                     throw new Exception("Product was not found!");
 
                 await _helper.Supply(supplierKey, productForSupply, transactionQuantity);
-                return View();
 
             }
             catch (Exception error)
             {
-                //ModelState.AddModelError("SupplierKey", $"{Environment.NewLine}{error.Message}");
                 ViewBag.AlertMessage = error.Message;
-                return View();
             }
-
+            return View();
         }
 
         /// <summary>
