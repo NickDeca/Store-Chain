@@ -43,32 +43,41 @@ namespace Store_chain.HelperMethods
                 State = (int)StateEnum.UndeterminedState
             };
 
-            try
+            await using (var t = _context.Database.BeginTransaction())
             {
-                var boughtValue = product.BoughtFromSuppliersCost * productQuantity;
 
-                UpdateSuppliersDue(supplierKey, boughtValue);
+                try
+                {
+                    // value of the product batch
+                    var boughtValue = product.BoughtFromSuppliersCost * productQuantity;
 
-                UpdateProductInStorage(product, supplierKey, productQuantity);
+                    // update the suppliers due payment
+                    UpdateSuppliersDue(supplierKey, boughtValue);
 
-                transaction.Capital = boughtValue;
+                    // update the storage whe just bought
+                    UpdateProductInStorage(product, supplierKey, productQuantity);
 
-                transaction.State = (int)StateEnum.OkState;
-                transactionManager.AddTransaction(transaction);
+                    transaction.Capital = boughtValue;
 
-                var idOfTransaction = transactionManager.GetTransaction(transaction).Id;
+                    transaction.State = (int)StateEnum.OkState;
+                    transactionManager.AddTransaction(transaction);
 
-                var storeManager = new StoreManager(_context);
-                storeManager.CreateStoreRow(boughtValue, idOfTransaction, StoreCalculationEnum.Subtraction);
-            }
-            catch (Exception error)
-            {
-                // transaction is updated to show the error message
-                transaction.ErrorText = error.Message;
-                transaction.State = (int)StateEnum.ErrorState;
-                transactionManager.AddTransaction(transaction);
+                    var idOfTransaction = transactionManager.GetTransaction(transaction).Id;
 
-                throw;
+                    var storeManager = new StoreManager(_context);
+
+                    storeManager.CreateStoreRow(boughtValue, idOfTransaction, StoreCalculationEnum.Subtraction);
+                }
+                catch (Exception error)
+                {
+                    // transaction is updated to show the error message
+                    transaction.ErrorText = error.Message;
+                    transaction.State = (int)StateEnum.ErrorState;
+                    transactionManager.AddTransaction(transaction);
+
+                    throw error;
+                }
+                await t.CommitAsync();
             }
         }
 
@@ -98,9 +107,7 @@ namespace Store_chain.HelperMethods
         {
             if (product.SupplierKey != supplierKey)
                 throw new Exception("The specified supplier does not contain the product");
-
-            //departConn.State = (int)DepartmentProductState.Filled;
-
+            
             product.QuantityInStorage += productQuantity;
 
             _context.Products.Update(product);
@@ -143,8 +150,8 @@ namespace Store_chain.HelperMethods
                         Description = toBeSavedProduct.Description,
                         Number = numToBeDisplayed,
                         State = toBeSavedProduct.MaxDisplay == numToBeDisplayed
-                            ? (int) DepartmentProductState.Filled
-                            : (int) DepartmentProductState.NeedFilling
+                            ? (int)DepartmentProductState.Filled
+                            : (int)DepartmentProductState.NeedFilling
                     };
                     _context.Department.Add(newConn);
                 }
@@ -159,6 +166,8 @@ namespace Store_chain.HelperMethods
                         productAlreadyInDepartment.State = (int)DepartmentProductState.OverFilled;
                     else
                         productAlreadyInDepartment.State = (int)DepartmentProductState.NeedFilling;
+
+                    _context.Department.Update(productAlreadyInDepartment);
                 }
 
                 _context.SaveChanges();
@@ -216,19 +225,20 @@ namespace Store_chain.HelperMethods
                     customerFullTransaction.ProductQuantity = product.TransactionQuantity;
                     customerFullTransaction.ErrorText = "OK!";
                     customerFullTransaction.State = (int)StateEnum.OkState;
+
+                    var storeManager = new StoreManager(_context);
+
+                    storeManager.CreateStoreRow(summedValue, customerFullTransaction.Id, StoreCalculationEnum.Addition);
                 }
                 catch (Exception error)
                 {
                     customerFullTransaction.State = (int)StateEnum.ErrorState;
                     customerFullTransaction.ErrorText = error.Message;
-                    throw;
+                    throw error;
                 }
 
                 await CheckIfNeedReSupply(product.toListFromOne());
-
-                _context.CentralStoreCapital.Add(new CentralStoreCapital { Capital = summedValue, TransactionKey = 0 });
-                //store.Capital += summedValue;
-
+                
                 _context.SaveChanges();
                 await transaction.CommitAsync();
             }
