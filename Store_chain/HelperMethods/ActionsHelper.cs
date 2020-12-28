@@ -149,6 +149,8 @@ namespace Store_chain.HelperMethods
                 // if the connection does not exist, create it
                 if (productAlreadyInDepartment == null)
                 {
+                    toBeSavedProduct.Department = department;
+                    toBeSavedProduct.DepartmentForeignId = department;
                     var newConn = new Department
                     {
                         DepartmentKey = department,

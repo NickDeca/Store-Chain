@@ -37,5 +37,8 @@ namespace Store_chain.Models
         public int MinStorage { get; set; }
 
         public Department department { get;set; }
+
+        public int DepartmentForeignId { get; set; }
+        
     }
 }
