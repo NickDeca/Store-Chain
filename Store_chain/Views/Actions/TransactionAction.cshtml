@@ -1,0 +1,81 @@
+﻿@model System.Collections.Generic.List<Store_chain.Data.Transactions>
+
+@{
+    ViewBag.Title = "title";
+    Layout = "_Layout";
+}
+
+<table class="table">
+
+    <thead>
+        <tr>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Id)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().RecipientKey)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ProviderKey)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Capital)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ProductKey)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().DateOfTransaction)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ProductQuantity)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().State)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().ErrorText)
+            </th>
+            <th>
+                @Html.DisplayNameFor(model => model.First().Type)
+            </th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model.Select(x => x).ToList())
+        {
+            <tr>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Id)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.RecipientKey)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProviderKey)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Capital)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductKey)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.DateOfTransaction)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ProductQuantity)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.State)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.ErrorText)
+                </td>
+                <td>
+                    @Html.DisplayFor(modelItem => item.Type)
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -147,5 +147,16 @@ namespace Store_chain.Controllers
                 return View(products);
             }
         }
+
+        /// <summary>
+        /// Get
+        /// </summary>
+        /// <returns></returns>
+        public async Task<IActionResult> TransactionAction()
+        {
+            var transactions = _context.Transactions.ToList().OrderByDescending(x => x.Id).Take(10).ToList();
+
+            return View(transactions);
+        }
     }
 }
