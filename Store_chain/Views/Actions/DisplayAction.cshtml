@@ -50,7 +50,7 @@
         foreach (var productse in item.Items)
         {
 
-            @if (productse.IsDisplay)
+            @if (productse.QuantityInDisplay != 0)
             {
                 <tr>
                     <form asp-action="DisplayAction" method="post">

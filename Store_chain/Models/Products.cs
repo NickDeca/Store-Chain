@@ -15,8 +15,8 @@ namespace Store_chain.Models
         public int Category { get; set; }
         public int Department { get; set; }
         public string Description { get; set; }
-        [DisplayName("In Display")]
-        public bool IsDisplay { get; set; }
+        //[DisplayName("In Display")]
+        //public bool IsDisplay { get; set; }
 
         [Column("CostSold")]
         [DisplayName("Cost Sold")]
