@@ -17,7 +17,7 @@ namespace Store_chain.Controllers
         }
         public IActionResult Index()
         {
-            var model = _context.CentralStoreCapital.Any() ? _context.CentralStoreCapital.Select(x => x).LastOrDefault() : null;
+            var model = _context.CentralStoreCapital.Any() ? _context.CentralStoreCapital.OrderByDescending(x => x.Id).FirstOrDefault() : null;
             return View(model);
         }
     }

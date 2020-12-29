@@ -20,7 +20,6 @@ namespace Store_chain.DataLayer
         //    => options.UseSqlite("data source=localhost\\SQLEXPRESS;initial catalog=Store Chain;integrated security=True;MultipleActiveResultSets=True;App=EntityFramework");
 
         public virtual DbSet<Customers> Customers { get; set; }
-        public virtual DbSet<Employees> Employees { get; set; }
         public virtual DbSet<Department> Department { get; set; }
         public virtual DbSet<Transactions> Transactions { get; set; }
         public virtual DbSet<Products> Products { get; set; }
