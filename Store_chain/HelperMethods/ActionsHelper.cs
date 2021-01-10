@@ -138,7 +138,7 @@ namespace Store_chain.HelperMethods
                 // up the number of displayed 
                 toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
 
-                toBeSavedProduct.QuantityInDisplay -= numToBeDisplayed;
+                toBeSavedProduct.QuantityInStorage -= numToBeDisplayed;
 
                 // check if connected with the department 
                 var productAlreadyInDepartment = _context.Department
@@ -247,6 +247,7 @@ namespace Store_chain.HelperMethods
 
                 await CheckIfNeedReSupply(product.toListFromOne());
                 
+                _context.Transactions.Update(customerFullTransaction);
                 _context.SaveChanges();
                 await transaction.CommitAsync();
             }
