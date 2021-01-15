@@ -57,10 +57,11 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Create([Bind("Id,SupplierKey,Category,Department,Description,IsDisplay,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay,MinStorage")] Products products)
+        public async Task<IActionResult> Create([Bind("Id,SupplierKey,Category,Department,Description,IsDisplay,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay,MinStorage,SoldToCustomersCostAsString,BoughtFromSuppliersCost")] Products products)
         {
             if (ModelState.IsValid)
             {
+                products.DepartmentForeignId = products.Department;
                 _context.Add(products);
                 _context.ProductMinQuantity.Add(new ProductMinQuantity{ProductKey = products.Id, MinDisplay = products.MaxDisplay, MinStorage = products.MinStorage});
                 await _context.SaveChangesAsync();
@@ -90,7 +91,7 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,SupplierKey,Category,Department,Description,IsDisplay,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay,MinStorage")] Products products)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,SupplierKey,Category,Department,Description,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay,MinStorage,SoldToCustomersCostAsString,BoughtFromSuppliersCost")] Products products)
         {
             if (id != products.Id)
             {
@@ -101,6 +102,7 @@ namespace Store_chain.Controllers
             {
                 try
                 {
+                    products.DepartmentForeignId = products.Department;
                     _context.Update(products);
                     await _context.SaveChangesAsync();
                 }

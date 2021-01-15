@@ -5,6 +5,8 @@ namespace Store_chain
 {
     public class Program
     {
+        public static char PointChar = double.TryParse("1,2", out _) ? ',' : '.';
+
         public static void Main(string[] args)
         {
             CreateHostBuilder(args).Build().Run();
