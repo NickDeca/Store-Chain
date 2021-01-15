@@ -13,6 +13,9 @@
     <thead>
         <tr>
             <th>
+                @Html.DisplayNameFor(model => model.Id)
+            </th>
+            <th>
                 @Html.DisplayNameFor(model => model.SupplierKey)
             </th>
             <th>
@@ -31,10 +34,10 @@
                 @Html.DisplayNameFor(model => model.BoughtFromSuppliersCost)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MaxDisplay)
+                @Html.DisplayNameFor(model => model.QuantityInDisplay)
             </th>
             <th>
-                @Html.DisplayNameFor(model => model.MinStorage)
+                @Html.DisplayNameFor(model => model.QuantityInStorage)
             </th>
             <th></th>
         </tr>
@@ -42,6 +45,9 @@
     <tbody>
 @foreach (var item in Model) {
         <tr>
+            <td>
+                @Html.DisplayFor(modelItem => item.Id)
+            </td>
             <td>
                 @Html.DisplayFor(modelItem => item.SupplierKey)
             </td>
@@ -61,10 +67,10 @@
                 @Html.DisplayFor(modelItem => item.BoughtFromSuppliersCost)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.MaxDisplay)
+                @Html.DisplayFor(modelItem => item.QuantityInDisplay)
             </td>
             <td>
-                @Html.DisplayFor(modelItem => item.MinStorage)
+                @Html.DisplayFor(modelItem => item.QuantityInStorage)
             </td>
             <td>
                 <a asp-action="Edit" asp-route-id="@item.Id">Edit</a> |
