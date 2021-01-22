@@ -245,11 +245,11 @@ namespace Store_chain.HelperMethods
                     throw error;
                 }
 
-                await CheckIfNeedReSupply(product.toListFromOne());
                 
                 _context.Transactions.Update(customerFullTransaction);
                 _context.SaveChanges();
                 await transaction.CommitAsync();
+                //await CheckIfNeedReSupply(product.toListFromOne());
             }
         }
 
