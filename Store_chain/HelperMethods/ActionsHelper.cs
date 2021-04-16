@@ -96,7 +96,7 @@ namespace Store_chain.HelperMethods
         {
             var supplier = _context.Suppliers.FirstOrDefault(x => x.Id == supplierKey);
             if (supplier == null)
-                throw new ActionsException("The specified supplier was not found",null,null,supplierKey);
+                throw new ActionsException("The specified supplier was not found", null, null, supplierKey);
 
             supplier.PaymentDue += boughtValue;
 
@@ -113,7 +113,7 @@ namespace Store_chain.HelperMethods
         {
             if (product.SupplierKey != supplierKey)
                 throw new ActionsException("The specified supplier does not contain the product", null, product.Id, supplierKey);
-          
+
             product.QuantityInStorage += productQuantity;
 
             _context.Products.Update(product);
@@ -183,7 +183,7 @@ namespace Store_chain.HelperMethods
             }
         }
 
-        public async Task Buy(Products product, Customers buyer,int transactionQuantity)
+        public async Task Buy(Products product, Customers buyer, int transactionQuantity)
         {
             // Get the value for all the products the customer is buying 
             var summedValue = product.SoldToCustomersCost * transactionQuantity;
@@ -194,7 +194,7 @@ namespace Store_chain.HelperMethods
             var timeOfTransaction = DateTime.Now;
 
             if (buyer.Capital - summedValue <= 0)
-                throw new ActionsException("Customer Does not have the capital required to the transaction",buyer.Id, product.Id);
+                throw new ActionsException("Customer Does not have the capital required to the transaction", buyer.Id, product.Id);
 
             var transactionManager = new TransactionManager(_context);
 
@@ -246,7 +246,7 @@ namespace Store_chain.HelperMethods
                     throw error;
                 }
 
-                
+
                 _context.Transactions.Update(customerFullTransaction);
                 _context.SaveChanges();
                 await transaction.CommitAsync();
@@ -254,22 +254,32 @@ namespace Store_chain.HelperMethods
             }
         }
 
-        private async Task CheckIfNeedReSupply(List<Products> products)
+        private async Task CheckIfNeedReSupply(IQueryable<Products> products)
+        {
+            var productsFromDepartments = CheckNeedForResupply(products);
+
+            if (productsFromDepartments.Any())
+                await Task.Run(() => productsFromDepartments
+                    .ForEach(async x => await Supply(x.Item1.SupplierKey, x.Item1, x.Item2)));
+        }
+
+        public List<Tuple<Products, int>> CheckNeedForResupply(IQueryable<Products> products)
         {
             var productsFromDepartments =
                 (from product in products
                  join minQuantity in _context.ProductMinQuantity
-                     on product.Id equals minQuantity.id
+                     on product.Id equals minQuantity.ProductKey
                  where product.QuantityInStorage < minQuantity.MinStorage
-                 select new
+                 select new 
                  {
-                     product,
+                     item1 = product,
                      QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
-                 }).ToList();
+                 })
+                 .AsEnumerable()
+                 .Select(x => new Tuple<Products, int>(x.item1, x.QuantityToBeSupplied))
+                 .ToList();
 
-            if (productsFromDepartments.Any())
-                await Task.Run(() => productsFromDepartments
-                    .ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
+            return productsFromDepartments;
         }
 
         public async Task UpdateProductInDisplay(Products productBought, int transactionQuantity)

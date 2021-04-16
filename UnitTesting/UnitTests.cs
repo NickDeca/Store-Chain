@@ -245,6 +245,39 @@ namespace UnitTesting
         }
 
         [Test]
+        public void CheckNeedForResupply_UnitTest()
+        {
+            // Arrange
+            var helper = new ActionsHelper(_context);
+            var listProductIds = new List<int> { 1, 2, 3, 4, 11, 15 };
+            var products = _context.Products.Where(x => listProductIds.Contains(x.Id));
+
+            var listExpectedIds = new List<int> { 2, 3, 15 };
+
+            // Act
+            var productsNeedingResupply = helper.CheckNeedForResupply(products);
+            var resultedProductsForResupply = productsNeedingResupply.Select(x => x.Item1.Id).OrderBy(x => x).ToList();
+
+            // Assert
+            CollectionAssert.AreEqual(listExpectedIds, resultedProductsForResupply);
+        }
+
+        [Test]
+        public void CheckNeedForResupply_NoNeed_For_Resupply()
+        {
+            // Arrange
+            var helper = new ActionsHelper(_context);
+            var listProductIds = new List<int> { 1, 4, 11 };
+            var products = _context.Products.Where(x => listProductIds.Contains(x.Id));
+
+            // Act
+            var productsNeedingResupply = helper.CheckNeedForResupply(products);
+
+            // Assert
+            CollectionAssert.IsEmpty(productsNeedingResupply);
+        }
+
+        [Test]
         public void UnitTest()
         {
             // Arrange
