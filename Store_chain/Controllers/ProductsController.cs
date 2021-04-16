@@ -5,7 +5,9 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.Data;
 using Store_chain.DataLayer;
+using Store_chain.HelperMethods;
 using Store_chain.Model;
 using Store_chain.Models;
 
@@ -14,10 +16,12 @@ namespace Store_chain.Controllers
     public class ProductsController : Controller
     {
         private readonly StoreChainContext _context;
+        private readonly ProductManager _helper;
 
         public ProductsController(StoreChainContext context)
         {
             _context = context;
+            _helper = new ProductManager(_context);
         }
 
         // GET: Products
@@ -61,10 +65,8 @@ namespace Store_chain.Controllers
         {
             if (ModelState.IsValid)
             {
-                products.DepartmentForeignId = products.Department;
-                _context.Add(products);
-                _context.ProductMinQuantity.Add(new ProductMinQuantity{ProductKey = products.Id, MinDisplay = products.MaxDisplay, MinStorage = products.MinStorage});
-                await _context.SaveChangesAsync();
+                await _helper.CreateProduct(products);
+
                 return RedirectToAction(nameof(Index));
             }
             return View(products);
@@ -102,9 +104,7 @@ namespace Store_chain.Controllers
             {
                 try
                 {
-                    products.DepartmentForeignId = products.Department;
-                    _context.Update(products);
-                    await _context.SaveChangesAsync();
+                    _helper.EditProduct(products);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -145,9 +145,7 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var products = await _context.Products.FindAsync(id);
-            _context.Products.Remove(products);
-            await _context.SaveChangesAsync();
+            _helper.DeleteProduct(id);
             return RedirectToAction(nameof(Index));
         }
 

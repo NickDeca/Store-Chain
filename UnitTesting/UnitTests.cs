@@ -287,6 +287,16 @@ namespace UnitTesting
             // Assert
         }
 
+        [Test]
+        public void UnitTest()
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
+        }
+
         [TearDown]
         public void TearDown()
         {

@@ -20,6 +20,8 @@ namespace Store_chain.HelperMethods
             _context = context;
         }
 
+
+
         /// <summary>
         /// It updates the supplier with their due money.
         /// Updates product with quantity in storage.
