@@ -8,6 +8,7 @@ using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.Enums;
 using TransactionManager = Store_chain.Data.TransactionManager;
+using Store_chain.Exceptions;
 
 namespace Store_chain.HelperMethods
 {
@@ -95,7 +96,7 @@ namespace Store_chain.HelperMethods
         {
             var supplier = _context.Suppliers.FirstOrDefault(x => x.Id == supplierKey);
             if (supplier == null)
-                throw new Exception("The specified supplier was not found");
+                throw new ActionsException("The specified supplier was not found",null,null,supplierKey);
 
             supplier.PaymentDue += boughtValue;
 
@@ -111,8 +112,8 @@ namespace Store_chain.HelperMethods
         public void UpdateProductInStorage(Products product, int supplierKey, int productQuantity)
         {
             if (product.SupplierKey != supplierKey)
-                throw new Exception("The specified supplier does not contain the product");
-            
+                throw new ActionsException("The specified supplier does not contain the product", null, product.Id, supplierKey);
+          
             product.QuantityInStorage += productQuantity;
 
             _context.Products.Update(product);
@@ -182,18 +183,18 @@ namespace Store_chain.HelperMethods
             }
         }
 
-        public async Task Buy(Products product, Customers buyer)
+        public async Task Buy(Products product, Customers buyer,int transactionQuantity)
         {
             // Get the value for all the products the customer is buying 
-            var summedValue = product.SoldToCustomersCost * product.TransactionQuantity;
+            var summedValue = product.SoldToCustomersCost * transactionQuantity;
 
             if (summedValue == 0)
-                throw new Exception("No Products bought");
+                throw new ActionsException("No Products bought");
 
             var timeOfTransaction = DateTime.Now;
 
             if (buyer.Capital - summedValue <= 0)
-                throw new Exception("Customer Does not have the capital required to the transaction");
+                throw new ActionsException("Customer Does not have the capital required to the transaction",buyer.Id, product.Id);
 
             var transactionManager = new TransactionManager(_context);
 
@@ -226,7 +227,7 @@ namespace Store_chain.HelperMethods
                     // update the customer with the new capital after paying
                     _context.Customers.Update(buyer);
 
-                    await UpdateProductInDisplay(product);
+                    await UpdateProductInDisplay(product, transactionQuantity);
 
                     // create another entry in the transactions, with all the info needed to be recognized
                     // subset of the major 
@@ -271,15 +272,16 @@ namespace Store_chain.HelperMethods
                     .ForEach(async x => await Supply(x.product.SupplierKey, x.product, x.QuantityToBeSupplied)));
         }
 
-        public async Task UpdateProductInDisplay(Products productBought)
+        public async Task UpdateProductInDisplay(Products productBought, int transactionQuantity)
         {
             var departmentConnection = _context.Department.FirstOrDefault(x => x.Prod_Id == productBought.Id);
 
             if (departmentConnection == null)
-                throw new Exception("Connection in department by product id was not found");
-            departmentConnection.Number -= productBought.TransactionQuantity;
+                throw new ConnectionExceptions("Connection in department by product id was not found", productBought.Id);
+            departmentConnection.Number -= transactionQuantity;
 
-            productBought.QuantityInDisplay -= productBought.TransactionQuantity;
+            //TODO Enum for operation - +
+            productBought.QuantityInDisplay -= transactionQuantity;
 
             _context.SaveChanges();
         }
@@ -287,11 +289,11 @@ namespace Store_chain.HelperMethods
         public void CheckValidityOfBuy(BuyActionClass buyClass)
         {
             if (buyClass.CustomerKey == 0)
-                throw new Exception("Please select a customer");
+                throw new ValidityException("Please select a customer");
             if (buyClass.ProductKey == 0)
-                throw new Exception("Please select a product");
+                throw new ValidityException("Please select a product");
             if (buyClass.Quantity == 0)
-                throw new Exception("Please give an amount of product you want to buy");
+                throw new ValidityException("Please give an amount of product you want to buy");
         }
 
         public List<Products> BringAllProducts()

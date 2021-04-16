@@ -137,7 +137,7 @@ namespace Store_chain.Controllers
                 if (customer == null)
                     throw new Exception("Customer not found retry!");
 
-                await _helper.Buy(productBought, customer);
+                await _helper.Buy(productBought, customer,buyClass.Quantity);
                 return View(products);
             }
             catch (Exception err)

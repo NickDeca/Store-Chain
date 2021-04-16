@@ -3,11 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
+using Store_chain.Data;
 using Store_chain.DataLayer;
+using Store_chain.Exceptions;
+using Store_chain.HelperMethods;
 
 namespace UnitTesting
 {
@@ -27,11 +31,10 @@ namespace UnitTesting
         }
 
         [Test]
-        public void UnitTest1()
+        public void Test_Products_Retrival_Not_Null()
         {
             // Arrange
-
-            
+                        
             // Act
             var products = _context.Products.ToList();
 
@@ -43,15 +46,212 @@ namespace UnitTesting
         public void UnitTestDepartments()
         {
             // Arrange
-
+            var departments = _context.Department.ToList();
 
             // Act
-            var departments = _context.Department.ToList();
 
             var products = departments.SelectMany(x => x.Products).ToList();
 
-            //Assert
+            // Assert
             Assert.That(products != null);
+        }
+
+        [Test]
+        public void CheckValidityOfBuy_Valid_Class()
+        {
+            // Arrange
+            var helper = new ActionsHelper(_context);
+            var buyClass = new BuyActionClass
+            {
+                CustomerKey = 1,
+                ProductKey = 1,
+                Quantity = 10
+            };
+
+            // Act
+
+            // Assert
+            Assert.DoesNotThrow(() => helper.CheckValidityOfBuy(buyClass));
+        }
+
+        [Test]
+        public void CheckValidityOfBuy_NonValid_Class()
+        {
+            // Arrange
+            var helper = new ActionsHelper(_context);
+            var buyClass = new BuyActionClass
+            {
+                CustomerKey = 0,
+                ProductKey = 1,
+                Quantity = 10
+            };
+
+            // Act
+
+            // Assert
+            Assert.Throws<ValidityException>(() => helper.CheckValidityOfBuy(buyClass));
+        }
+
+        [Test]
+        public void UpdateSuppliersDue_NoSupplier()
+        {
+            // Arrange
+            var supplierId = 100;
+            var boughtValue = 1.00m;
+            var helper = new ActionsHelper(_context);
+            var exceptionExpected = new ActionsException("The specified supplier was not found", null, null, supplierId);
+
+            // Act
+            try
+            {
+                helper.UpdateSuppliersDue(supplierId, boughtValue);
+            }
+            catch (ActionsException ae)
+            {
+                // Assert
+                Assert.IsNull(ae.CustomerId);
+                Assert.IsNull(ae.ProductId);
+                Assert.AreEqual(ae.SupplierId, exceptionExpected.SupplierId);
+                StringAssert.AreEqualIgnoringCase(ae.Message, exceptionExpected.Message);
+            }
+            catch (Exception e)
+            {
+                // Assert
+                Assert.Equals(e, exceptionExpected);
+            }
+        }
+
+        [Test]
+        public void UpdateSuppliersDue_Supplier()
+        {
+            // Arrange
+            var supplierId = 1;
+            var boughtValue = 1.00m;
+            var helper = new ActionsHelper(_context);
+            var supplierBefore = _context.Suppliers.Find(supplierId);
+            var expectedValue = supplierBefore.PaymentDue + 1.00m;
+
+            // Act
+            helper.UpdateSuppliersDue(supplierId, boughtValue);
+
+            var supplierAfter = _context.Suppliers.Find(supplierId);
+
+            // Assert
+            Assert.AreEqual(supplierAfter.PaymentDue, expectedValue);
+        }
+
+        [Test]
+        public void UpdateProductInStorage_No_Product_Found()
+        {
+            // Arrange
+            var product = _context.Products.Find(1);
+            var supplierId = 2;
+            var productQuantity = 100;
+            var helper = new ActionsHelper(_context);
+            var exceptionExpected = new ActionsException("The specified supplier does not contain the product", null, product.Id, supplierId);
+
+            // Act
+            try
+            {
+                helper.UpdateProductInStorage(product, supplierId, productQuantity);
+
+            }
+            catch (ActionsException ae)
+            {
+                // Assert
+                Assert.IsNull(ae.CustomerId);
+                Assert.Equals(ae.ProductId, product.Id);
+                Assert.AreEqual(ae.SupplierId, exceptionExpected.SupplierId);
+                StringAssert.AreEqualIgnoringCase(ae.Message, exceptionExpected.Message);
+            }
+            catch (Exception e)
+            {
+                // Assert
+                Assert.Equals(e, exceptionExpected);
+            }
+
+        }
+
+        [Test]
+        public void UpdateProductInStorage_Product_Updated()
+        {
+            // Arrange
+            var productBefore = _context.Products.Find(1);
+            var supplierId = 2;
+            var productQuantity = 1;
+            var helper = new ActionsHelper(_context);
+            var expectedQuantity = productBefore.QuantityInStorage + productQuantity;
+
+            // Act
+            helper.UpdateProductInStorage(productBefore, supplierId, productQuantity);
+            var productAfter = _context.Products.Find(1);
+
+            // Assert
+            Assert.Equals(expectedQuantity, productAfter.QuantityInStorage);
+        }
+
+        [Test]
+        public async Task UpdateProductInDisplay_Department_Not_FoundAsync()
+        {
+            // Arrange
+            var helper = new ActionsHelper(_context);
+            var productId = 11;
+            var product = _context.Products.Find(productId);
+            var quantity = 1;
+            var departmentConnection = _context.Department.FirstOrDefault(x => x.Prod_Id == 1);
+            var exceptionExpected = new ConnectionExceptions("Connection in department by product id was not found", productId);
+
+            try
+            {
+                // Act
+                await helper.UpdateProductInDisplay(product, quantity);
+            }
+            catch (ConnectionExceptions ce)
+            {
+                // Assert
+                Assert.AreEqual(ce.ProductId, productId);
+                StringAssert.AreEqualIgnoringCase(ce.Message, exceptionExpected.Message);
+
+            }
+            catch (Exception e)
+            {
+                // Assert
+                Assert.Equals(e, exceptionExpected);
+            }
+
+        }
+
+        [Test]
+        public async Task UpdateProductInDisplay_Updated_DisplayAsync()
+        {
+            // Arrange
+            var helper = new ActionsHelper(_context);
+            var productId = 1;
+            var productBefore = _context.Products.Find(productId);
+            var departmentConnectionBefore = _context.Department.FirstOrDefault(x => x.Prod_Id == productId);
+            var quantity = 1;
+
+            var productExpectedQuantityDisplay = productBefore.QuantityInDisplay - quantity;
+            var departmentnumberExpected = departmentConnectionBefore.Number - quantity;
+
+            // Act
+            await helper.UpdateProductInDisplay(productBefore, quantity);
+            var productAfter = _context.Products.Find(productId);
+            var departmentConnectionAfter = _context.Department.FirstOrDefault(x => x.Prod_Id == productId);
+
+            // Assert
+            Assert.AreEqual(productExpectedQuantityDisplay, productAfter.QuantityInDisplay);
+            Assert.AreEqual(departmentnumberExpected, departmentConnectionAfter.Number);
+        }
+
+        [Test]
+        public void UnitTest()
+        {
+            // Arrange
+
+            // Act
+
+            // Assert
         }
 
         [TearDown]
