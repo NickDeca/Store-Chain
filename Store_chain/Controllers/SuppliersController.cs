@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.Model;
 
@@ -12,17 +9,17 @@ namespace Store_chain.Controllers
 {
     public class SuppliersController : Controller
     {
-        private readonly StoreChainContext _context;
+        private readonly SupplierManager _manager;
 
         public SuppliersController(StoreChainContext context)
         {
-            _context = context;
+            _manager = new SupplierManager(context);
         }
 
         // GET: Suppliers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Suppliers.ToListAsync());
+            return View(await _manager.BringSuppliers());
         }
 
         // GET: Suppliers/Details/5
@@ -33,8 +30,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var suppliers = await _context.Suppliers
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var suppliers = _manager.BringSupplier(id.Value);
             if (suppliers == null)
             {
                 return NotFound();
@@ -58,8 +54,7 @@ namespace Store_chain.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(suppliers);
-                await _context.SaveChangesAsync();
+                await _manager.CreateSupplier(suppliers);
                 return RedirectToAction(nameof(Index));
             }
             return View(suppliers);
@@ -73,7 +68,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var suppliers = await _context.Suppliers.FindAsync(id);
+            var suppliers = _manager.FindSuppliersAsync(id.Value);
             if (suppliers == null)
             {
                 return NotFound();
@@ -97,8 +92,7 @@ namespace Store_chain.Controllers
             {
                 try
                 {
-                    _context.Update(suppliers);
-                    await _context.SaveChangesAsync();
+                    _manager.EditSupplier(suppliers);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -124,8 +118,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var suppliers = await _context.Suppliers
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var suppliers = await _manager.BringSupplier(id.Value);
             if (suppliers == null)
             {
                 return NotFound();
@@ -139,15 +132,13 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var suppliers = await _context.Suppliers.FindAsync(id);
-            _context.Suppliers.Remove(suppliers);
-            await _context.SaveChangesAsync();
+            _manager.DeleteCustomer(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool SuppliersExists(int id)
         {
-            return _context.Suppliers.Any(e => e.Id == id);
+            return _manager.AnySuppliers(id);
         }
     }
 }

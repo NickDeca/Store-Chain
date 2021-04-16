@@ -2,6 +2,7 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.Model;
 
@@ -9,17 +10,19 @@ namespace Store_chain.Controllers
 {
     public class CustomersController : Controller
     {
-        private readonly StoreChainContext _context;
+        //private readonly StoreChainContext _context;
+        private readonly CustomerManager _manager;
 
         public CustomersController(StoreChainContext context)
         {
-            _context = context;
+            //_context = context;
+            _manager = new CustomerManager(context);
         }
 
         // GET: Customers
         public async Task<IActionResult> Index()
         {
-            return View(await _context.Customers.ToListAsync());
+            return View(_manager.BringCustomers());
         }
 
         // GET: Customers/Details/5
@@ -30,8 +33,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = await _context.Customers
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var customers = _manager.BringCustomer(id.Value);
             if (customers == null)
             {
                 return NotFound();
@@ -55,8 +57,7 @@ namespace Store_chain.Controllers
         {
             if (ModelState.IsValid)
             {
-                _context.Add(customers);
-                await _context.SaveChangesAsync();
+                await _manager.CreateCustomer(customers);
                 return RedirectToAction(nameof(Index));
             }
             return View(customers);
@@ -70,7 +71,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = await _context.Customers.FindAsync(id);
+            var customers = _manager.FindCustomer(id.Value);
             if (customers == null)
             {
                 return NotFound();
@@ -94,8 +95,7 @@ namespace Store_chain.Controllers
             {
                 try
                 {
-                    _context.Update(customers);
-                    await _context.SaveChangesAsync();
+                    await _manager.EditCustomer(customers);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -121,8 +121,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = await _context.Customers
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var customers = _manager.BringCustomer(id.Value);
             if (customers == null)
             {
                 return NotFound();
@@ -136,15 +135,13 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            var customers = await _context.Customers.FindAsync(id);
-            _context.Customers.Remove(customers);
-            await _context.SaveChangesAsync();
+            await _manager.DeleteCustomer(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool CustomersExists(int id)
         {
-            return _context.Customers.Any(e => e.Id == id);
+            return _manager.AnyCustomer(id);
         }
     }
 }

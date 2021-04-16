@@ -1,33 +1,26 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.Data;
 using Store_chain.DataLayer;
-using Store_chain.HelperMethods;
-using Store_chain.Model;
 using Store_chain.Models;
 
 namespace Store_chain.Controllers
 {
     public class ProductsController : Controller
     {
-        private readonly StoreChainContext _context;
-        private readonly ProductManager _helper;
+        private readonly ProductManager _manager;
 
         public ProductsController(StoreChainContext context)
         {
-            _context = context;
-            _helper = new ProductManager(_context);
+            _manager = new ProductManager(context);
         }
 
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            var products = _context.Products.Select(x => x).ToList();
+            var products = _manager.BringProducts();
             
             return View(products);
         }
@@ -40,8 +33,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var products = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var products = _manager.BringProduct(id.Value);
             if (products == null)
             {
                 return NotFound();
@@ -65,7 +57,7 @@ namespace Store_chain.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _helper.CreateProduct(products);
+                await _manager.CreateProduct(products);
 
                 return RedirectToAction(nameof(Index));
             }
@@ -80,7 +72,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var products = await _context.Products.FindAsync(id);
+            var products = _manager.FindProduct(id.Value);
             if (products == null)
             {
                 return NotFound();
@@ -104,7 +96,7 @@ namespace Store_chain.Controllers
             {
                 try
                 {
-                    _helper.EditProduct(products);
+                    await _manager.EditProduct(products);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -130,8 +122,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var products = await _context.Products
-                .FirstOrDefaultAsync(m => m.Id == id);
+            var products = _manager.BringProduct(id.Value);
             if (products == null)
             {
                 return NotFound();
@@ -145,13 +136,13 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            _helper.DeleteProduct(id);
+            await _manager.DeleteProduct(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool ProductsExists(int id)
         {
-            return _context.Products.Any(e => e.Id == id);
+            return _manager.AnyProducts(id);
         }
     }
 }

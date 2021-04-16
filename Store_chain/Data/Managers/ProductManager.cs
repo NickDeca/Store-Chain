@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Store_chain.DataLayer;
 using Store_chain.Models;
@@ -13,6 +14,27 @@ namespace Store_chain.Data
         public ProductManager(StoreChainContext context)
         {
             _context = context;
+        }
+
+        public async Task<List<Products>> BringProducts()
+        {
+            return await _context.Products.Select(x => x).ToListAsync();
+        }
+
+        public async Task<Products> BringProduct(int id)
+        {
+            return await _context.Products
+                .FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<Products> FindProduct(int id)
+        {
+            return await _context.Products.FindAsync(id);
+        }
+
+        public bool AnyProducts(int id)
+        {
+            return _context.Products.Any(e => e.Id == id);
         }
 
         public async Task CreateProduct(Products product)
