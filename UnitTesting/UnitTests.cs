@@ -12,6 +12,8 @@ using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.Exceptions;
 using Store_chain.HelperMethods;
+using Store_chain.Model;
+using Store_chain.Models;
 
 namespace UnitTesting
 {
@@ -278,13 +280,27 @@ namespace UnitTesting
         }
 
         [Test]
-        public void UnitTest()
+        public async Task Creation_Test_CustomersAsync()
         {
             // Arrange
+            var customer = new Customers
+            {
+                Capital = 50.11m,
+                Description = "CustomerNew",
+                FirstName = "Customer",
+                LastName = "New"                
+            };
+            var manager = new CustomerManager(_context);
 
             // Act
+            await manager.CreateCustomer(customer);
+            var customerCreated = _context.Customers.OrderByDescending(x => x.Id).FirstOrDefault();
 
             // Assert
+            Assert.AreEqual(customer.Capital, customerCreated.Capital);
+            StringAssert.AreEqualIgnoringCase(customer.FirstName, customerCreated.FirstName);
+            StringAssert.AreEqualIgnoringCase(customer.LastName, customerCreated.LastName);
+            StringAssert.AreEqualIgnoringCase(customer.Description, customerCreated.Description);
         }
 
         [Test]
