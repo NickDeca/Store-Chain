@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Store_chain.Data;
+using Store_chain.Model;
 using Store_chain.Models;
 
 namespace Store_chain.DataLayer

@@ -2,9 +2,9 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using Store_chain.Data;
+using Store_chain.Data.Managers;
 using Store_chain.DataLayer;
-using Store_chain.Models;
+using Store_chain.Model;
 
 namespace Store_chain.Controllers
 {
@@ -15,14 +15,13 @@ namespace Store_chain.Controllers
 
         public CustomersController(StoreChainContext context)
         {
-            //_context = context;
             _manager = new CustomerManager(context);
         }
 
         // GET: Customers
         public async Task<IActionResult> Index()
         {
-            return View(await _manager.BringCustomers());
+            return View(await _manager.BringAll());
         }
 
         // GET: Customers/Details/5
@@ -33,7 +32,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = await _manager.BringCustomer(id.Value);
+            var customers = await _manager.BringOne(id.Value);
             if (customers == null)
             {
                 return NotFound();
@@ -57,7 +56,7 @@ namespace Store_chain.Controllers
         {
             if (ModelState.IsValid)
             {
-                await _manager.CreateCustomer(customers);
+                await _manager.Create(customers);
                 return RedirectToAction(nameof(Index));
             }
             return View(customers);
@@ -71,7 +70,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = await _manager.FindCustomer(id.Value);
+            var customers = await _manager.FindOne(id.Value);
             if (customers == null)
             {
                 return NotFound();
@@ -95,7 +94,7 @@ namespace Store_chain.Controllers
             {
                 try
                 {
-                    await _manager.EditCustomer(customers);
+                    await _manager.Edit(customers);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -121,7 +120,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = await _manager.BringCustomer(id.Value);
+            var customers = await _manager.BringOne(id.Value);
             if (customers == null)
             {
                 return NotFound();
@@ -135,13 +134,13 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            await _manager.DeleteCustomer(id);
+            await _manager.Delete(id);
             return RedirectToAction(nameof(Index));
         }
 
         private bool CustomersExists(int id)
         {
-            return _manager.AnyCustomer(id);
+            return _manager.Any(id);
         }
     }
 }

@@ -4,11 +4,12 @@ using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using System.Threading.Tasks;
 using Store_chain.DataLayer;
+using Store_chain.Model;
 using Store_chain.Models;
 
-namespace Store_chain.Data
+namespace Store_chain.Data.Managers
 {
-    public class ProductManager
+    public class ProductManager : IManager<Products>
     {
         private readonly StoreChainContext _context;
         public ProductManager(StoreChainContext context)
@@ -16,28 +17,28 @@ namespace Store_chain.Data
             _context = context;
         }
 
-        public async Task<List<Products>> BringProducts()
+        public async Task<List<Products>> BringAll()
         {
             return await _context.Products.Select(x => x).ToListAsync();
         }
 
-        public async Task<Products> BringProduct(int id)
+        public async Task<Products> BringOne(int id)
         {
             return await _context.Products
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<Products> FindProduct(int id)
+        public async Task<Products> FindOne(int id)
         {
             return await _context.Products.FindAsync(id);
         }
 
-        public bool AnyProducts(int id)
+        public bool Any(int id)
         {
             return _context.Products.Any(e => e.Id == id);
         }
 
-        public async Task CreateProduct(Products product)
+        public async Task Create(Products product)
         {
             product.DepartmentForeignId = product.Department;
             _context.Add(product);
@@ -45,14 +46,14 @@ namespace Store_chain.Data
             await _context.SaveChangesAsync();
         }
 
-        public async Task EditProduct(Products product)
+        public async Task Edit(Products product)
         {
             product.DepartmentForeignId = product.Department;
             _context.Update(product);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteProduct(int id)
+        public async Task Delete(int id)
         {
             var products = await _context.Products.FindAsync(id);
             _context.Products.Remove(products);

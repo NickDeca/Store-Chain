@@ -1,8 +1,10 @@
-﻿namespace Store_chain.Models
+﻿namespace Store_chain.Model
 {
     using System.ComponentModel.DataAnnotations;
     using System.ComponentModel.DataAnnotations.Schema;
-    public abstract class BaseModel
+    using Store_chain.Models;
+
+    public abstract class BaseModel : IBaseModel
     {
 
         [Key]

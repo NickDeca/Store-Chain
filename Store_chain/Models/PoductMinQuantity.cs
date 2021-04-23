@@ -1,7 +1,7 @@
 ﻿using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Store_chain.Models
+namespace Store_chain.Model
 {
     public class ProductMinQuantity : BaseModel
     {

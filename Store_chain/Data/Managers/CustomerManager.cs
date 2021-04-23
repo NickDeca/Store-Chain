@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.DataLayer;
-using Store_chain.Models;
+using Store_chain.Model;
 
-namespace Store_chain.Data
+namespace Store_chain.Data.Managers
 {
-    public class CustomerManager
+    public class CustomerManager : IManager<Customers>
     {
         private readonly StoreChainContext _context;
         public CustomerManager(StoreChainContext context)
@@ -16,39 +16,39 @@ namespace Store_chain.Data
             _context = context;
         }
 
-        public async Task<List<Customers>> BringCustomers()
+        public async Task<List<Customers>> BringAll()
         {
             return await _context.Customers.ToListAsync();
         }
 
-        public async Task<Customers> BringCustomer(int id)
+        public async Task<Customers> BringOne(int id)
         {
             return await _context.Customers.FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<Customers> FindCustomer(int id)
+        public async Task<Customers> FindOne(int id)
         {
             return await _context.Customers.FindAsync(id);
         }
 
-        public bool AnyCustomer(int id)
+        public bool Any(int id)
         {
             return _context.Customers.Any(e => e.Id == id);
         }
 
-        public async Task CreateCustomer(Customers customer)
+        public async Task Create(Customers customer)
         {
             _context.Add(customer);
             await _context.SaveChangesAsync();
         }
 
-        public async Task EditCustomer(Customers customer)
+        public async Task Edit(Customers customer)
         {
             _context.Update(customer);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteCustomer(int id)
+        public async Task Delete(int id)
         {
             var customers = await _context.Customers.FindAsync(id);
             _context.Customers.Remove(customers);

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Linq;
+using Store_chain.Data.Managers;
 using Store_chain.DataLayer;
 using Store_chain.Enums;
-using Store_chain.Models;
 
 namespace Store_chain.Data
 {
@@ -14,7 +14,7 @@ namespace Store_chain.Data
             _context = context;
         }
 
-        public void CreateStoreRow(decimal capital, int transactionKey, StoreCalculationEnum operation)
+        public async void CreateStoreRow(decimal capital, int transactionKey, StoreCalculationEnum operation)
         {
             DateTime timeNow = DateTime.Now;
             TransactionManager transactionManager = new TransactionManager(_context);
@@ -59,7 +59,7 @@ namespace Store_chain.Data
                     if (operation == StoreCalculationEnum.Subtraction)
                         throw new Exception("First ever transaction should be an addition");
                     
-                    transactionManager.AddTransaction(firstTransaction);
+                    await transactionManager.AddTransaction(firstTransaction);
 
                     _context.CentralStoreCapital.Add(new CentralStoreCapital
                     {
@@ -72,7 +72,7 @@ namespace Store_chain.Data
                 {
                     firstTransaction.ErrorText = err.Message;
                     firstTransaction.State = (int) StateEnum.ErrorState;
-                    transactionManager.AddTransaction(firstTransaction);
+                    await transactionManager .AddTransaction(firstTransaction);
                     throw err;
                 }
             }

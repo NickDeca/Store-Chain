@@ -7,22 +7,22 @@ using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.HelperMethods;
-using Store_chain.Models;
+using Store_chain.Model;
 
 namespace Store_chain.Controllers
 {
-    public class ActionsController : Controller
+    public class ActionsController : BaseController
     {
         private readonly StoreChainContext _context;
-        private IActionsHelper _helper;
+        private readonly IActionsHelper _helper;
 
-        public ActionsController(StoreChainContext context, IActionsHelper helper)
+        public ActionsController(StoreChainContext context, IActionsHelper helper) : base(context, helper)
         {
             _context = context;
             _helper = helper;
         }
 
-        public async Task<IActionResult> Index()
+        public IActionResult Index()
         {
             return View();
         }
@@ -32,9 +32,8 @@ namespace Store_chain.Controllers
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<IActionResult> SupplyAction(int? id)
+        public IActionResult SupplyAction(int? id)
         {
-            //var product = await _context.Products.FindAsync(id);
             return View();
         }
 
@@ -67,7 +66,7 @@ namespace Store_chain.Controllers
         {
             var products = await _helper.BringAllProducts();
 
-            return View(products);
+            return View(products.First());
         }
 
         /// <summary>

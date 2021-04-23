@@ -6,9 +6,10 @@ using System.Threading.Tasks;
 using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.Enums;
-using TransactionManager = Store_chain.Data.TransactionManager;
+using Store_chain.Data.Managers;
 using Store_chain.Exceptions;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.Model;
 
 namespace Store_chain.HelperMethods
 {
@@ -65,7 +66,7 @@ namespace Store_chain.HelperMethods
                 transaction.Capital = boughtValue;
 
                 transaction.State = (int)StateEnum.OkState;
-                transactionManager.AddTransaction(transaction);
+                await transactionManager.AddTransaction(transaction);
 
                 var idOfTransaction = transactionManager.GetTransaction(transaction).Id;
 
@@ -78,7 +79,7 @@ namespace Store_chain.HelperMethods
                 // transaction is updated to show the error message
                 transaction.ErrorText = error.Message;
                 transaction.State = (int)StateEnum.ErrorState;
-                transactionManager.AddTransaction(transaction);
+                await transactionManager .AddTransaction(transaction);
 
                 throw error;
             }
@@ -205,7 +206,7 @@ namespace Store_chain.HelperMethods
             // what time did the transaction take place
             // the amount the customer is buying
             var customerFullTransaction =
-                transactionManager.AddTransaction(new Transactions
+                await transactionManager.AddTransaction(new Transactions
                 {
                     RecipientKey = 0,
                     ProviderKey = buyer.Id,

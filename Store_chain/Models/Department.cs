@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Store_chain.Models;
 
-namespace Store_chain.Data
+namespace Store_chain.Model
 {
     /// <summary>
     /// Department works with rows being what product id is connected to what department id

@@ -1,5 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
-using Store_chain.Models;
+using Store_chain.Model;
 
 namespace Store_chain.Data
 {

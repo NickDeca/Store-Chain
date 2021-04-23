@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-namespace Store_chain.Models
+namespace Store_chain.Model
 {
     public partial class Suppliers : BaseModelDescriptive
     {

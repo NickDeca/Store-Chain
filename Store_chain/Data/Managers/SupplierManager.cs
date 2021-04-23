@@ -4,11 +4,11 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.DataLayer;
-using Store_chain.Models;
+using Store_chain.Model;
 
-namespace Store_chain.Data
+namespace Store_chain.Data.Managers
 {
-    public class SupplierManager
+    public class SupplierManager : IManager<Suppliers>
     {
         private readonly StoreChainContext _context;
         public SupplierManager(StoreChainContext context)
@@ -16,38 +16,38 @@ namespace Store_chain.Data
             _context = context;
         }
 
-        public async Task<List<Suppliers>> BringSuppliers()
+        public async Task<List<Suppliers>> BringAll()
         {
-           return await _context.Suppliers.ToListAsync();
+            return await _context.Suppliers.ToListAsync();
         }
 
-        public async Task<Suppliers> BringSupplier(int id)
+        public async Task<Suppliers> BringOne(int id)
         {
             return await _context.Suppliers.FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<Suppliers> FindSuppliersAsync(int id)
+        public async Task<Suppliers> FindOne(int id)
         {
             return await _context.Suppliers.FindAsync(id);
         }
 
-        public bool AnySuppliers(int id)
+        public bool Any(int id)
         {
             return _context.Suppliers.Any(e => e.Id == id);
         }
-        public async Task CreateSupplier(Suppliers supplier)
+        public async Task Create(Suppliers supplier)
         {
             _context.Add(supplier);
             await _context.SaveChangesAsync();
         }
 
-        public async Task EditSupplier(Suppliers supplier)
+        public async Task Edit(Suppliers supplier)
         {
             _context.Update(supplier);
             await _context.SaveChangesAsync();
         }
 
-        public async Task DeleteCustomer(int id)
+        public async Task Delete(int id)
         {
             var suppliers = await _context.Suppliers.FindAsync(id);
             _context.Suppliers.Remove(suppliers);

@@ -3,7 +3,7 @@ using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 using Microsoft.AspNetCore.Mvc;
-using Store_chain.Data;
+using Store_chain.Model;
 
 namespace Store_chain.Models
 {

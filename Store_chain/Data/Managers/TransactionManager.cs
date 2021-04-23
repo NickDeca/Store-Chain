@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using Store_chain.DataLayer;
 using Store_chain.Enums;
-using Store_chain.Models;
 
-namespace Store_chain.Data
+namespace Store_chain.Data.Managers
 {
     public class TransactionManager
     {
@@ -15,10 +15,10 @@ namespace Store_chain.Data
             _context = context;
         }
 
-        public Transactions AddTransaction(Transactions transaction)
+        public async Task<Transactions> AddTransaction(Transactions transaction)
         {
             _context.Transactions.Add(transaction);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
             return GetTransaction(transaction.RecipientKey, transaction.ProviderKey, transaction.ProductKey, transaction.DateOfTransaction);
         }
 
@@ -42,10 +42,10 @@ namespace Store_chain.Data
                                      x.DateOfTransaction == transaction.DateOfTransaction);
         }
 
-        public void AddTransactionRange(List<Transactions> transactions)
+        public async Task AddTransactionRangeAsync(List<Transactions> transactions)
         {
             _context.Transactions.AddRange(transactions);
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         public IEnumerable<Transactions> GeTransactionsByCustomer(int recipient)

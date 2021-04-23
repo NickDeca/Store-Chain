@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Store_chain.Data;
+using Store_chain.Model;
 using Store_chain.Models;
 
 namespace Store_chain.HelperMethods

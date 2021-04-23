@@ -8,10 +8,11 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using NUnit.Framework;
 using Store_chain.Data;
+using Store_chain.Data.Managers;
 using Store_chain.DataLayer;
 using Store_chain.Exceptions;
 using Store_chain.HelperMethods;
-using Store_chain.Models;
+using Store_chain.Model;
 
 namespace UnitTesting
 {
@@ -291,7 +292,7 @@ namespace UnitTesting
             var manager = new CustomerManager(_context);
 
             // Act
-            await manager.CreateCustomer(customer);
+            await manager.Create(customer);
             var customerCreated = _context.Customers.OrderByDescending(x => x.Id).FirstOrDefault();
 
             // Assert

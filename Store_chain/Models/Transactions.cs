@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
+using Store_chain.Model;
 
-namespace Store_chain.Models
+namespace Store_chain.Data
 {
     public class Transactions : BaseModel
     {
