@@ -8,46 +8,14 @@ using Store_chain.Models;
 
 namespace Store_chain.Controllers
 {
-    public class ProductsController : Controller
+    public class ProductsController : BaseController<Products>
     {
-        private readonly ProductManager _manager;
+        private readonly IManager<Products> _manager;
 
-        public ProductsController(StoreChainContext context)
+        public ProductsController(IManager<Products> manager) : base(manager)
         {
-            _manager = new ProductManager(context);
+            _manager = manager;
         }
-
-        // GET: Products
-        public async Task<IActionResult> Index()
-        {
-            var products = await _manager.BringAll();
-            
-            return View(products);
-        }
-
-        // GET: Products/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var products = await _manager.BringOne(id.Value);
-            if (products == null)
-            {
-                return NotFound();
-            }
-
-            return View(products);
-        }
-
-        // GET: Products/Create
-        public IActionResult Create()
-        {
-            return View();
-        }
-
         // POST: Products/Create
         // To protect from overposting attacks, please enable the specific properties you want to bind to, for 
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
@@ -60,22 +28,6 @@ namespace Store_chain.Controllers
                 await _manager.Create(products);
 
                 return RedirectToAction(nameof(Index));
-            }
-            return View(products);
-        }
-
-        // GET: Products/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var products = await _manager.FindOne(id.Value);
-            if (products == null)
-            {
-                return NotFound();
             }
             return View(products);
         }
@@ -100,7 +52,7 @@ namespace Store_chain.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!ProductsExists(products.Id))
+                    if (!AnyExists(products.Id))
                     {
                         return NotFound();
                     }
@@ -114,23 +66,6 @@ namespace Store_chain.Controllers
             return View(products);
         }
 
-        // GET: Products/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var products = await _manager.BringOne(id.Value);
-            if (products == null)
-            {
-                return NotFound();
-            }
-
-            return View(products);
-        }
-
         // POST: Products/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -138,11 +73,6 @@ namespace Store_chain.Controllers
         {
             await _manager.Delete(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool ProductsExists(int id)
-        {
-            return _manager.Any(id);
         }
     }
 }

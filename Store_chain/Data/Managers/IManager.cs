@@ -6,7 +6,7 @@ using Store_chain.Models;
 
 namespace Store_chain.Data.Managers
 {
-    interface IManager<TModel> where TModel : class, IBaseModel
+    public interface IManager<TModel> where TModel : class, IBaseModel
     {
         Task<List<TModel>> BringAll();
         Task<TModel> BringOne(int id);

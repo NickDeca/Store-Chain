@@ -4,47 +4,19 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.Data.Managers;
 using Store_chain.DataLayer;
+using Store_chain.HelperMethods;
 using Store_chain.Model;
 
 namespace Store_chain.Controllers
 {
-    public class CustomersController : Controller
+    public class CustomersController : BaseController<Customers>
     {
         //private readonly StoreChainContext _context;
-        private readonly CustomerManager _manager;
+        private readonly IManager<Customers> _manager;
 
-        public CustomersController(StoreChainContext context)
+        public CustomersController(IManager<Customers> manager) : base(manager)
         {
-            _manager = new CustomerManager(context);
-        }
-
-        // GET: Customers
-        public async Task<IActionResult> Index()
-        {
-            return View(await _manager.BringAll());
-        }
-
-        // GET: Customers/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var customers = await _manager.BringOne(id.Value);
-            if (customers == null)
-            {
-                return NotFound();
-            }
-
-            return View(customers);
-        }
-
-        // GET: Customers/Create
-        public IActionResult Create()
-        {
-            return View();
+            _manager = manager;
         }
 
         // POST: Customers/Create
@@ -58,22 +30,6 @@ namespace Store_chain.Controllers
             {
                 await _manager.Create(customers);
                 return RedirectToAction(nameof(Index));
-            }
-            return View(customers);
-        }
-
-        // GET: Customers/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var customers = await _manager.FindOne(id.Value);
-            if (customers == null)
-            {
-                return NotFound();
             }
             return View(customers);
         }
@@ -98,7 +54,7 @@ namespace Store_chain.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!CustomersExists(customers.Id))
+                    if (!AnyExists(customers.Id))
                     {
                         return NotFound();
                     }
@@ -112,23 +68,6 @@ namespace Store_chain.Controllers
             return View(customers);
         }
 
-        // GET: Customers/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var customers = await _manager.BringOne(id.Value);
-            if (customers == null)
-            {
-                return NotFound();
-            }
-
-            return View(customers);
-        }
-
         // POST: Customers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -136,11 +75,6 @@ namespace Store_chain.Controllers
         {
             await _manager.Delete(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool CustomersExists(int id)
-        {
-            return _manager.Any(id);
         }
     }
 }

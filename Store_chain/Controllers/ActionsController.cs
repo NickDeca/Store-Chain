@@ -11,12 +11,12 @@ using Store_chain.Model;
 
 namespace Store_chain.Controllers
 {
-    public class ActionsController : BaseController
+    public class ActionsController : Controller
     {
         private readonly StoreChainContext _context;
         private readonly IActionsHelper _helper;
 
-        public ActionsController(StoreChainContext context, IActionsHelper helper) : base(context, helper)
+        public ActionsController(StoreChainContext context, IActionsHelper helper) //: base(context, helper)
         {
             _context = context;
             _helper = helper;

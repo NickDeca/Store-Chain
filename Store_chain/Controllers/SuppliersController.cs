@@ -7,42 +7,13 @@ using Store_chain.Model;
 
 namespace Store_chain.Controllers
 {
-    public class SuppliersController : Controller
+    public class SuppliersController : BaseController<Suppliers>
     {
-        private readonly SupplierManager _manager;
+        private readonly IManager<Suppliers> _manager;
 
-        public SuppliersController(StoreChainContext context)
+        public SuppliersController(IManager<Suppliers> manager) : base(manager)
         {
-            _manager = new SupplierManager(context);
-        }
-
-        // GET: Suppliers
-        public async Task<IActionResult> Index()
-        {
-            return View(await _manager.BringAll());
-        }
-
-        // GET: Suppliers/Details/5
-        public async Task<IActionResult> Details(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var suppliers = await _manager.BringOne(id.Value);
-            if (suppliers == null)
-            {
-                return NotFound();
-            }
-
-            return View(suppliers);
-        }
-
-        // GET: Suppliers/Create
-        public IActionResult Create()
-        {
-            return View();
+            _manager = manager;
         }
 
         // POST: Suppliers/Create
@@ -56,22 +27,6 @@ namespace Store_chain.Controllers
             {
                 await _manager.Create(suppliers);
                 return RedirectToAction(nameof(Index));
-            }
-            return View(suppliers);
-        }
-
-        // GET: Suppliers/Edit/5
-        public async Task<IActionResult> Edit(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var suppliers = await _manager.FindOne(id.Value);
-            if (suppliers == null)
-            {
-                return NotFound();
             }
             return View(suppliers);
         }
@@ -96,7 +51,7 @@ namespace Store_chain.Controllers
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!SuppliersExists(suppliers.Id))
+                    if (!AnyExists(suppliers.Id))
                     {
                         return NotFound();
                     }
@@ -110,23 +65,6 @@ namespace Store_chain.Controllers
             return View(suppliers);
         }
 
-        // GET: Suppliers/Delete/5
-        public async Task<IActionResult> Delete(int? id)
-        {
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            var suppliers = await _manager.BringOne(id.Value);
-            if (suppliers == null)
-            {
-                return NotFound();
-            }
-
-            return View(suppliers);
-        }
-
         // POST: Suppliers/Delete/5
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
@@ -134,11 +72,6 @@ namespace Store_chain.Controllers
         {
             await _manager.Delete(id);
             return RedirectToAction(nameof(Index));
-        }
-
-        private bool SuppliersExists(int id)
-        {
-            return _manager.Any(id);
         }
     }
 }

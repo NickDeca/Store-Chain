@@ -6,6 +6,9 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.DataLayer;
 using Store_chain.HelperMethods;
+using Store_chain.Data.Managers;
+using Store_chain.Model;
+using Store_chain.Models;
 
 namespace Store_chain
 {
@@ -26,7 +29,12 @@ namespace Store_chain
             services.AddDbContext<StoreChainContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("Store_chainContext")));
 
-            services.AddSingleton<IActionsHelper, ActionsHelper>();
+            
+            services.AddScoped<IActionsHelper, ActionsHelper>();
+
+            services.AddTransient<IManager<Customers>, CustomerManager>();
+            services.AddTransient<IManager<Products>, ProductManager>();
+            services.AddTransient<IManager<Suppliers>, SupplierManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
