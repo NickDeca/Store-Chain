@@ -1,5 +1,4 @@
-﻿using Store_chain.Model;
-using Store_chain.Models;
+﻿using Store_chain.Models;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -9,10 +8,11 @@ using Store_chain.DataLayer;
 using Store_chain.Enums;
 using TransactionManager = Store_chain.Data.TransactionManager;
 using Store_chain.Exceptions;
+using Microsoft.EntityFrameworkCore;
 
 namespace Store_chain.HelperMethods
 {
-    public class ActionsHelper
+    public class ActionsHelper : IActionsHelper
     {
         private readonly StoreChainContext _context;
         public ActionsHelper(StoreChainContext context)
@@ -49,44 +49,42 @@ namespace Store_chain.HelperMethods
                 Type = "Bought from supplier"
             };
 
-            await using (var t = _context.Database.BeginTransaction())
+            await using var t = _context.Database.BeginTransaction();
+
+            try
             {
+                // value of the product batch
+                var boughtValue = product.BoughtFromSuppliersCost * productQuantity;
 
-                try
-                {
-                    // value of the product batch
-                    var boughtValue = product.BoughtFromSuppliersCost * productQuantity;
+                // update the suppliers due payment
+                UpdateSuppliersDue(supplierKey, boughtValue);
 
-                    // update the suppliers due payment
-                    UpdateSuppliersDue(supplierKey, boughtValue);
+                // update the storage whe just bought
+                UpdateProductInStorage(product, supplierKey, productQuantity);
 
-                    // update the storage whe just bought
-                    UpdateProductInStorage(product, supplierKey, productQuantity);
+                transaction.Capital = boughtValue;
 
-                    transaction.Capital = boughtValue;
+                transaction.State = (int)StateEnum.OkState;
+                transactionManager.AddTransaction(transaction);
 
-                    transaction.State = (int)StateEnum.OkState;
-                    transactionManager.AddTransaction(transaction);
+                var idOfTransaction = transactionManager.GetTransaction(transaction).Id;
 
-                    var idOfTransaction = transactionManager.GetTransaction(transaction).Id;
+                var storeManager = new StoreManager(_context);
 
-                    var storeManager = new StoreManager(_context);
-
-                    storeManager.CreateStoreRow(boughtValue, idOfTransaction, StoreCalculationEnum.Subtraction);
-                }
-                catch (Exception error)
-                {
-                    // transaction is updated to show the error message
-                    transaction.ErrorText = error.Message;
-                    transaction.State = (int)StateEnum.ErrorState;
-                    transactionManager.AddTransaction(transaction);
-
-                    throw error;
-                }
-
-                _context.SaveChanges();
-                await t.CommitAsync();
+                storeManager.CreateStoreRow(boughtValue, idOfTransaction, StoreCalculationEnum.Subtraction);
             }
+            catch (Exception error)
+            {
+                // transaction is updated to show the error message
+                transaction.ErrorText = error.Message;
+                transaction.State = (int)StateEnum.ErrorState;
+                transactionManager.AddTransaction(transaction);
+
+                throw error;
+            }
+
+            _context.SaveChanges();
+            await t.CommitAsync();
         }
 
         /// <summary>
@@ -136,53 +134,51 @@ namespace Store_chain.HelperMethods
 
             if (toBeSavedProduct == null)
                 throw new Exception("No such Product in the database");
-            await using (var transaction = _context.Database.BeginTransaction())
+            await using var transaction = _context.Database.BeginTransaction();
+            // up the number of displayed 
+            toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
+
+            toBeSavedProduct.QuantityInStorage -= numToBeDisplayed;
+
+            // check if connected with the department 
+            var productAlreadyInDepartment = _context.Department
+                .FirstOrDefault(x => x.Id == department && x.Prod_Id == toBeSavedProduct.Id);
+
+            _context.Products.Update(toBeSavedProduct);
+
+            // if the connection does not exist, create it
+            if (productAlreadyInDepartment == null)
             {
-                // up the number of displayed 
-                toBeSavedProduct.QuantityInDisplay += numToBeDisplayed;
-
-                toBeSavedProduct.QuantityInStorage -= numToBeDisplayed;
-
-                // check if connected with the department 
-                var productAlreadyInDepartment = _context.Department
-                    .FirstOrDefault(x => x.Id == department && x.Prod_Id == toBeSavedProduct.Id);
-
-                _context.Products.Update(toBeSavedProduct);
-
-                // if the connection does not exist, create it
-                if (productAlreadyInDepartment == null)
+                toBeSavedProduct.Department = department;
+                toBeSavedProduct.DepartmentForeignId = department;
+                var newConn = new Department
                 {
-                    toBeSavedProduct.Department = department;
-                    toBeSavedProduct.DepartmentForeignId = department;
-                    var newConn = new Department
-                    {
-                        DepartmentKey = department,
-                        Description = toBeSavedProduct.Description,
-                        Number = numToBeDisplayed,
-                        State = toBeSavedProduct.MaxDisplay == numToBeDisplayed
-                            ? (int)DepartmentProductState.Filled
-                            : (int)DepartmentProductState.NeedFilling
-                    };
-                    _context.Department.Add(newConn);
-                }
-                // else update the number of products in display 
-                else
-                {
-                    productAlreadyInDepartment.Number += numToBeDisplayed;
-
-                    if (productAlreadyInDepartment.Number == toBeSavedProduct.MaxDisplay)
-                        productAlreadyInDepartment.State = (int)DepartmentProductState.Filled;
-                    else if (productAlreadyInDepartment.Number > toBeSavedProduct.MaxDisplay)
-                        productAlreadyInDepartment.State = (int)DepartmentProductState.OverFilled;
-                    else
-                        productAlreadyInDepartment.State = (int)DepartmentProductState.NeedFilling;
-
-                    _context.Department.Update(productAlreadyInDepartment);
-                }
-
-                _context.SaveChanges();
-                await transaction.CommitAsync();
+                    DepartmentKey = department,
+                    Description = toBeSavedProduct.Description,
+                    Number = numToBeDisplayed,
+                    State = toBeSavedProduct.MaxDisplay == numToBeDisplayed
+                        ? (int)DepartmentProductState.Filled
+                        : (int)DepartmentProductState.NeedFilling
+                };
+                _context.Department.Add(newConn);
             }
+            // else update the number of products in display 
+            else
+            {
+                productAlreadyInDepartment.Number += numToBeDisplayed;
+
+                if (productAlreadyInDepartment.Number == toBeSavedProduct.MaxDisplay)
+                    productAlreadyInDepartment.State = (int)DepartmentProductState.Filled;
+                else if (productAlreadyInDepartment.Number > toBeSavedProduct.MaxDisplay)
+                    productAlreadyInDepartment.State = (int)DepartmentProductState.OverFilled;
+                else
+                    productAlreadyInDepartment.State = (int)DepartmentProductState.NeedFilling;
+
+                _context.Department.Update(productAlreadyInDepartment);
+            }
+
+            _context.SaveChanges();
+            await transaction.CommitAsync();
         }
 
         public async Task Buy(Products product, Customers buyer, int transactionQuantity)
@@ -201,59 +197,57 @@ namespace Store_chain.HelperMethods
             var transactionManager = new TransactionManager(_context);
 
             // begin the transaction 
-            await using (var transaction = _context.Database.BeginTransaction())
+            await using var transaction = _context.Database.BeginTransaction();
+            buyer.Capital -= summedValue;
+
+            // Create a new transaction about
+            // who bought
+            // what time did the transaction take place
+            // the amount the customer is buying
+            var customerFullTransaction =
+                transactionManager.AddTransaction(new Transactions
+                {
+                    RecipientKey = 0,
+                    ProviderKey = buyer.Id,
+                    ProductKey = product.Id,
+                    DateOfTransaction = timeOfTransaction,
+                    State = (int)StateEnum.UndeterminedState,
+                    Capital = summedValue,
+                    ErrorText = string.Empty,
+                    Type = "Sold to customer"
+                });
+
+            if (customerFullTransaction == null)
+                throw new Exception("transaction manager has encountered a problem");
+            try
             {
-                buyer.Capital -= summedValue;
+                // update the customer with the new capital after paying
+                _context.Customers.Update(buyer);
 
-                // Create a new transaction about
-                // who bought
-                // what time did the transaction take place
-                // the amount the customer is buying
-                var customerFullTransaction =
-                    transactionManager.AddTransaction(new Transactions
-                    {
-                        RecipientKey = 0,
-                        ProviderKey = buyer.Id,
-                        ProductKey = product.Id,
-                        DateOfTransaction = timeOfTransaction,
-                        State = (int)StateEnum.UndeterminedState,
-                        Capital = summedValue,
-                        ErrorText = string.Empty,
-                        Type = "Sold to customer"
-                    });
+                await UpdateProductInDisplay(product, transactionQuantity);
 
-                if (customerFullTransaction == null)
-                    throw new Exception("transaction manager has encountered a problem");
-                try
-                {
-                    // update the customer with the new capital after paying
-                    _context.Customers.Update(buyer);
+                // create another entry in the transactions, with all the info needed to be recognized
+                // subset of the major 
+                customerFullTransaction.ProductQuantity = product.TransactionQuantity;
+                customerFullTransaction.ErrorText = "OK!";
+                customerFullTransaction.State = (int)StateEnum.OkState;
 
-                    await UpdateProductInDisplay(product, transactionQuantity);
+                var storeManager = new StoreManager(_context);
 
-                    // create another entry in the transactions, with all the info needed to be recognized
-                    // subset of the major 
-                    customerFullTransaction.ProductQuantity = product.TransactionQuantity;
-                    customerFullTransaction.ErrorText = "OK!";
-                    customerFullTransaction.State = (int)StateEnum.OkState;
-
-                    var storeManager = new StoreManager(_context);
-
-                    storeManager.CreateStoreRow(summedValue, customerFullTransaction.Id, StoreCalculationEnum.Addition);
-                }
-                catch (Exception error)
-                {
-                    customerFullTransaction.State = (int)StateEnum.ErrorState;
-                    customerFullTransaction.ErrorText = error.Message;
-                    throw error;
-                }
-
-
-                _context.Transactions.Update(customerFullTransaction);
-                _context.SaveChanges();
-                await transaction.CommitAsync();
-                //await CheckIfNeedReSupply(product.toListFromOne());
+                storeManager.CreateStoreRow(summedValue, customerFullTransaction.Id, StoreCalculationEnum.Addition);
             }
+            catch (Exception error)
+            {
+                customerFullTransaction.State = (int)StateEnum.ErrorState;
+                customerFullTransaction.ErrorText = error.Message;
+                throw error;
+            }
+
+
+            _context.Transactions.Update(customerFullTransaction);
+            _context.SaveChanges();
+            await transaction.CommitAsync();
+            //await CheckIfNeedReSupply(product.toListFromOne());
         }
 
         private async Task CheckIfNeedReSupply(IQueryable<Products> products)
@@ -272,7 +266,7 @@ namespace Store_chain.HelperMethods
                  join minQuantity in _context.ProductMinQuantity
                      on product.Id equals minQuantity.ProductKey
                  where product.QuantityInStorage < minQuantity.MinStorage
-                 select new 
+                 select new
                  {
                      item1 = product,
                      QuantityToBeSupplied = minQuantity.MinStorage - product.QuantityInStorage
@@ -295,7 +289,7 @@ namespace Store_chain.HelperMethods
             //TODO Enum for operation - +
             productBought.QuantityInDisplay -= transactionQuantity;
 
-            _context.SaveChanges();
+            await _context.SaveChangesAsync();
         }
 
         public void CheckValidityOfBuy(BuyActionClass buyClass)
@@ -308,11 +302,11 @@ namespace Store_chain.HelperMethods
                 throw new ValidityException("Please give an amount of product you want to buy");
         }
 
-        public List<Products> BringAllProducts()
+        public Task<List<Products>> BringAllProducts()
         {
             try
             {
-                var products = _context.Products.Select(x => x).ToList();
+                var products = _context.Products.Select(x => x).ToListAsync();
 
                 return products;
             }

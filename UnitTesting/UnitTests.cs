@@ -6,13 +6,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using NUnit.Framework;
 using Store_chain.Data;
 using Store_chain.DataLayer;
 using Store_chain.Exceptions;
 using Store_chain.HelperMethods;
-using Store_chain.Model;
 using Store_chain.Models;
 
 namespace UnitTesting

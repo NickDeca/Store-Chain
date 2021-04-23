@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.VisualStudio.Web.CodeGeneration.Contracts.Messaging;
 using Store_chain.Data;
 using Store_chain.DataLayer;
@@ -13,12 +14,12 @@ namespace Store_chain.Controllers
     public class ActionsController : Controller
     {
         private readonly StoreChainContext _context;
-        private ActionsHelper _helper;
+        private IActionsHelper _helper;
 
-        public ActionsController(StoreChainContext context)
+        public ActionsController(StoreChainContext context, IActionsHelper helper)
         {
             _context = context;
-            _helper = new ActionsHelper(_context);
+            _helper = helper;
         }
 
         public async Task<IActionResult> Index()
@@ -64,7 +65,7 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         public async Task<IActionResult> DisplayAction(int? id)
         {
-            var products = _helper.BringAllProducts();
+            var products = await _helper.BringAllProducts();
 
             return View(products);
         }
@@ -102,7 +103,7 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         public async Task<IActionResult> BuyAction()
         {
-            var products = _helper.BringAllProducts();
+            var products = await _helper.BringAllProducts();
 
             return View(products);
         }
@@ -154,7 +155,7 @@ namespace Store_chain.Controllers
         /// <returns></returns>
         public async Task<IActionResult> TransactionAction()
         {
-            var transactions = _context.Transactions.ToList().OrderByDescending(x => x.Id).Take(10).ToList();
+            var transactions = await _context.Transactions.OrderByDescending(x => x.Id).Take(10).ToListAsync();
 
             return View(transactions);
         }
