@@ -7,16 +7,13 @@ using Store_chain.Data;
 
 namespace Store_chain.Models
 {
-    public partial class Products
+    public partial class Products : BaseModelDescriptive
     {
-        [Key]
-        public int Id { get; set; }
         [Column("Supplier_Key")]
         [DisplayName("Supplier")]
         public int SupplierKey { get; set; }
         public int Category { get; set; }
         public int Department { get; set; }
-        public string Description { get; set; }
         //[DisplayName("In Display")]
         //public bool IsDisplay { get; set; }
 
@@ -24,13 +21,13 @@ namespace Store_chain.Models
         [DisplayName("Cost Sold")]
         public decimal SoldToCustomersCost { get; set; }
 
-        private string _SoldToCustomersCost { get; set; }
+        private string _soldToCustomersCost { get; set; }
 
         [BindProperty(Name = "SoldToCustomersCost", SupportsGet = false)]
         [NotMapped]
         public string SoldToCustomersCostAsString
         {
-            get => _SoldToCustomersCost;
+            get => _soldToCustomersCost;
             set
             {
                 decimal.TryParse(value, out decimal trueValue);

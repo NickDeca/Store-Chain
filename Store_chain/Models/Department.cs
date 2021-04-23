@@ -9,13 +9,9 @@ namespace Store_chain.Data
     /// <summary>
     /// Department works with rows being what product id is connected to what department id
     /// </summary>
-    public class Department
+    public class Department : BaseModelDescriptive
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public int Id { get; set; }
         // Description of the Department
-        public string Description { get; set; }
         public int? DepartmentKey { get; set; }
 
         // Number of products in display
