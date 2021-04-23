@@ -82,9 +82,4 @@
             return _manager.Any(id);
         }
     }
-
-    internal interface IBaseController<TEntity> where TEntity : class, IBaseModel
-    {
-        Task<IActionResult> Details(int? id);
-    }
 }
