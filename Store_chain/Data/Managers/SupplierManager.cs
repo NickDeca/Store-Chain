@@ -4,7 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.DataLayer;
-using Store_chain.Model;
+using Store_chain.Models;
 
 namespace Store_chain.Data
 {

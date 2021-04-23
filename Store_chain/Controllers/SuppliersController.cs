@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.Data;
 using Store_chain.DataLayer;
-using Store_chain.Model;
+using Store_chain.Models;
 
 namespace Store_chain.Controllers
 {
@@ -30,7 +30,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var suppliers = _manager.BringSupplier(id.Value);
+            var suppliers = await _manager.BringSupplier(id.Value);
             if (suppliers == null)
             {
                 return NotFound();
@@ -68,7 +68,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var suppliers = _manager.FindSuppliersAsync(id.Value);
+            var suppliers = await _manager.FindSuppliersAsync(id.Value);
             if (suppliers == null)
             {
                 return NotFound();
@@ -92,7 +92,7 @@ namespace Store_chain.Controllers
             {
                 try
                 {
-                    _manager.EditSupplier(suppliers);
+                    await _manager.EditSupplier(suppliers);
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -132,7 +132,7 @@ namespace Store_chain.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
         {
-            _manager.DeleteCustomer(id);
+            await _manager.DeleteCustomer(id);
             return RedirectToAction(nameof(Index));
         }
 

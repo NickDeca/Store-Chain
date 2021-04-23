@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.Data;
 using Store_chain.DataLayer;
-using Store_chain.Model;
+using Store_chain.Models;
 
 namespace Store_chain.Controllers
 {
@@ -22,7 +22,7 @@ namespace Store_chain.Controllers
         // GET: Customers
         public async Task<IActionResult> Index()
         {
-            return View(_manager.BringCustomers());
+            return View(await _manager.BringCustomers());
         }
 
         // GET: Customers/Details/5
@@ -33,7 +33,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = _manager.BringCustomer(id.Value);
+            var customers = await _manager.BringCustomer(id.Value);
             if (customers == null)
             {
                 return NotFound();
@@ -71,7 +71,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = _manager.FindCustomer(id.Value);
+            var customers = await _manager.FindCustomer(id.Value);
             if (customers == null)
             {
                 return NotFound();
@@ -121,7 +121,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var customers = _manager.BringCustomer(id.Value);
+            var customers = await _manager.BringCustomer(id.Value);
             if (customers == null)
             {
                 return NotFound();

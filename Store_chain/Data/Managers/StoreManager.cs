@@ -2,6 +2,7 @@
 using System.Linq;
 using Store_chain.DataLayer;
 using Store_chain.Enums;
+using Store_chain.Models;
 
 namespace Store_chain.Data
 {

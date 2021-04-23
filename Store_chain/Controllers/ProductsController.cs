@@ -20,7 +20,7 @@ namespace Store_chain.Controllers
         // GET: Products
         public async Task<IActionResult> Index()
         {
-            var products = _manager.BringProducts();
+            var products = await _manager.BringProducts();
             
             return View(products);
         }
@@ -33,7 +33,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var products = _manager.BringProduct(id.Value);
+            var products = await _manager.BringProduct(id.Value);
             if (products == null)
             {
                 return NotFound();
@@ -72,7 +72,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var products = _manager.FindProduct(id.Value);
+            var products = await _manager.FindProduct(id.Value);
             if (products == null)
             {
                 return NotFound();
@@ -122,7 +122,7 @@ namespace Store_chain.Controllers
                 return NotFound();
             }
 
-            var products = _manager.BringProduct(id.Value);
+            var products = await _manager.BringProduct(id.Value);
             if (products == null)
             {
                 return NotFound();
