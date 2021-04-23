@@ -9,13 +9,13 @@ namespace Store_chain.Controllers
 {
     public class HomeController : Controller
     {
-        private readonly ILogger<HomeController> _logger;
-        private readonly StoreChainContext _context;
+        //private readonly ILogger<HomeController> _logger;
+        //private readonly StoreChainContext _context;
 
-        public HomeController(ILogger<HomeController> logger, StoreChainContext context)
+        public HomeController()//ILogger<HomeController> logger, StoreChainContext context)
         {
-            _logger = logger;
-            _context = context;
+            //_logger = logger;
+            //_context = context;
         }
 
         public IActionResult Index()

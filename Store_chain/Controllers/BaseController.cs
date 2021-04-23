@@ -11,7 +11,7 @@
     {
         //private readonly StoreChainContext _context;
         //private IActionsHelper _helper;
-        private IManager<TEntity> _manager;
+        private readonly IManager<TEntity> _manager;
 
         public BaseController(IManager<TEntity> manager)//, StoreChainContext context, IActionsHelper helper)
         {

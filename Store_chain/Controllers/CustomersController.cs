@@ -11,7 +11,6 @@ namespace Store_chain.Controllers
 {
     public class CustomersController : BaseController<Customers>
     {
-        //private readonly StoreChainContext _context;
         private readonly IManager<Customers> _manager;
 
         public CustomersController(IManager<Customers> manager) : base(manager)

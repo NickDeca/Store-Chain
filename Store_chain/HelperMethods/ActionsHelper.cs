@@ -251,14 +251,14 @@ namespace Store_chain.HelperMethods
             //await CheckIfNeedReSupply(product.toListFromOne());
         }
 
-        private async Task CheckIfNeedReSupply(IQueryable<Products> products)
-        {
-            var productsFromDepartments = CheckNeedForResupply(products);
+        //private async Task CheckIfNeedReSupply(IQueryable<Products> products)
+        //{
+        //    var productsFromDepartments = CheckNeedForResupply(products);
 
-            if (productsFromDepartments.Any())
-                await Task.Run(() => productsFromDepartments
-                    .ForEach(async x => await Supply(x.Item1.SupplierKey, x.Item1, x.Item2)));
-        }
+        //    if (productsFromDepartments.Any())
+        //        await Task.Run(() => productsFromDepartments
+        //            .ForEach(async x => await Supply(x.Item1.SupplierKey, x.Item1, x.Item2)));
+        //}
 
         public List<Tuple<Products, int>> CheckNeedForResupply(IQueryable<Products> products)
         {

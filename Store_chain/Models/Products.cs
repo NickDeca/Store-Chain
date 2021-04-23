@@ -21,13 +21,13 @@ namespace Store_chain.Models
         [DisplayName("Cost Sold")]
         public decimal SoldToCustomersCost { get; set; }
 
-        private string _soldToCustomersCost { get; set; }
+        private string soldToCustomersCost { get; set; }
 
         [BindProperty(Name = "SoldToCustomersCost", SupportsGet = false)]
         [NotMapped]
         public string SoldToCustomersCostAsString
         {
-            get => _soldToCustomersCost;
+            get => soldToCustomersCost;
             set
             {
                 decimal.TryParse(value, out decimal trueValue);
@@ -39,13 +39,13 @@ namespace Store_chain.Models
         [DisplayName("Cost Bought")]
         public decimal BoughtFromSuppliersCost { get; set; }
 
-        private string _BoughtFromSuppliersCost { get; set; }
+        private string boughtFromSuppliersCost { get; set; }
 
         [BindProperty(Name = "BoughtFromSuppliersCost", SupportsGet = false)]
         [NotMapped]
         public string BoughtFromSuppliersCostAsString
         {
-            get => _BoughtFromSuppliersCost;
+            get => boughtFromSuppliersCost;
             set
             {
                 decimal.TryParse(value, out decimal trueValue);

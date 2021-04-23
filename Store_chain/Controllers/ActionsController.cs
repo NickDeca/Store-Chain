@@ -30,9 +30,8 @@ namespace Store_chain.Controllers
         /// <summary>
         /// Get
         /// </summary>
-        /// <param name="id"></param>
         /// <returns></returns>
-        public IActionResult SupplyAction(int? id)
+        public IActionResult SupplyAction()//int? id)
         {
             return View();
         }
@@ -62,7 +61,7 @@ namespace Store_chain.Controllers
         /// Get
         /// </summary>
         /// <returns></returns>
-        public async Task<IActionResult> DisplayAction(int? id)
+        public async Task<IActionResult> DisplayAction()//int? id)
         {
             var products = await _helper.BringAllProducts();
 
