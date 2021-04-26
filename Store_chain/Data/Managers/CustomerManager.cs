@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.DataLayer;
+using Store_chain.Exceptions;
 using Store_chain.Model;
 
 namespace Store_chain.Data.Managers
@@ -24,6 +25,11 @@ namespace Store_chain.Data.Managers
         public async Task<Customers> BringOne(int id)
         {
             return await _context.Customers.FirstOrDefaultAsync(m => m.Id == id);
+        }
+
+        public async Task<Customers> TryBringOne(int id)
+        {
+            return await _context.Customers.FirstOrDefaultAsync(m => m.Id == id) ?? throw new DbNotFoundEntityException();
         }
 
         public async Task<Customers> FindOne(int id)
@@ -53,6 +59,11 @@ namespace Store_chain.Data.Managers
             var customers = await _context.Customers.FindAsync(id);
             _context.Customers.Remove(customers);
             await _context.SaveChangesAsync();
+        }
+
+        public void ChangeDTOToFull(ref dynamic fullClass, dynamic DTO)
+        {
+            throw new NotImplementedException();
         }
     }
 }

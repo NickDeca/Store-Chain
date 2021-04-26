@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Store_chain.DataLayer;
 using Store_chain.Model;
 using Store_chain.Models;
+using Store_chain.Exceptions;
 
 namespace Store_chain.Data.Managers
 {
@@ -28,6 +29,11 @@ namespace Store_chain.Data.Managers
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
+        public async Task<Products> TryBringOne(int id)
+        {
+            return await _context.Products.FirstOrDefaultAsync(m => m.Id == id) ?? throw new DbNotFoundEntityException();
+        }
+
         public async Task<Products> FindOne(int id)
         {
             return await _context.Products.FindAsync(id);
@@ -46,11 +52,20 @@ namespace Store_chain.Data.Managers
             await _context.SaveChangesAsync();
         }
 
-        public async Task Edit(Products product)
+        public async Task Edit(int id, dynamic DTO)
         {
-            product.DepartmentForeignId = product.Department;
-            _context.Update(product);
-            await _context.SaveChangesAsync();
+            var product = await TryBringOne(id);
+            try
+            {
+                ChangeDTOToFull(ref product, DTO);
+                product.DepartmentForeignId = product.Department;
+                _context.Update(product);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception err)
+            {
+                throw err;
+            }
         }
 
         public async Task Delete(int id)
@@ -58,6 +73,38 @@ namespace Store_chain.Data.Managers
             var products = await _context.Products.FindAsync(id);
             _context.Products.Remove(products);
             await _context.SaveChangesAsync();
+        }
+
+        public void ChangeDTOToFull(ref Products fullClass, dynamic DTO)
+        {
+            if (DTO.SupplierKey != default(int))
+                fullClass.SupplierKey = DTO.SupplierKey;
+            if (DTO.Category != default(int))
+                fullClass.Category = DTO.Category;
+
+            if (DTO.Department != default(int))
+                fullClass.Department = DTO.Department;
+
+            if (DTO.SoldToCustomersCost != default(decimal))
+                fullClass.SoldToCustomersCost = DTO.SoldToCustomersCost;
+
+            if (DTO.BoughtFromSuppliersCost != default(decimal))
+                fullClass.SupplierKey = DTO.SupplierKey;
+
+            if (DTO.TransactionQuantity != default(int))
+                fullClass.TransactionQuantity = DTO.TransactionQuantity;
+
+            if (DTO.QuantityInStorage != default(int))
+                fullClass.QuantityInStorage = DTO.QuantityInStorage;
+
+            if (DTO.QuantityInDisplay != default(int))
+                fullClass.QuantityInDisplay = DTO.QuantityInDisplay;
+
+            if (DTO.MaxDisplay != default(int))
+                fullClass.MaxDisplay = DTO.MaxDisplay;
+
+            if (DTO.MinStorage != default(int))
+                fullClass.MinStorage = DTO.MinStorage;
         }
     }
 }

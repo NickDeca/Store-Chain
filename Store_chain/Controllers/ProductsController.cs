@@ -2,8 +2,10 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.Data.DTO;
 using Store_chain.Data.Managers;
 using Store_chain.DataLayer;
+using Store_chain.Exceptions;
 using Store_chain.Models;
 
 namespace Store_chain.Controllers
@@ -37,33 +39,25 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,SupplierKey,Category,Department,Description,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay,MinStorage,SoldToCustomersCostAsString,BoughtFromSuppliersCost")] Products products)
+        public async Task<IActionResult> Edit(int id, ProductEditViewDTO productDTO)// [Bind("Id,SupplierKey,Category,Department,Description,CostSold,CostBought,TransactionQuantity,QuantityInStorage,QuantityInDisplay,MaxDisplay,MinStorage,SoldToCustomersCostAsString,BoughtFromSuppliersCost")] Products products)
         {
-            if (id != products.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _manager.Edit(products);
+                    await _manager.Edit(id, productDTO);
+                }
+                catch (DbNotFoundEntityException)
+                {
+                    return NotFound();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AnyExists(products.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(products);
+            return View(productDTO);
         }
 
         // POST: Products/Delete/5
