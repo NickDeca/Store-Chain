@@ -2,18 +2,20 @@
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.Data.DTO;
 using Store_chain.Data.Managers;
 using Store_chain.DataLayer;
+using Store_chain.Exceptions;
 using Store_chain.HelperMethods;
 using Store_chain.Model;
 
 namespace Store_chain.Controllers
 {
-    public class CustomersController : BaseController<Customers>
+    public class CustomersController : BaseController<Customers, CustomerEditViewDTO>
     {
-        private readonly IManager<Customers> _manager;
+        private readonly IManager<Customers, CustomerEditViewDTO> _manager;
 
-        public CustomersController(IManager<Customers> manager) : base(manager)
+        public CustomersController(IManager<Customers, CustomerEditViewDTO> manager) : base(manager)
         {
             _manager = manager;
         }
@@ -38,33 +40,25 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,Capital,Description,FirstName,LastName")] Customers customers)
+        public async Task<IActionResult> Edit(int id, CustomerEditViewDTO customerDTO)//[Bind("Id,Capital,Description,FirstName,LastName")] Customers customers)
         {
-            if (id != customers.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _manager.Edit(customers);
+                    await _manager.Edit(id, customerDTO);
+                }
+                catch (DbNotFoundEntityException)
+                {
+                    return NotFound();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AnyExists(customers.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(customers);
+            return View(customerDTO);
         }
 
         // POST: Customers/Delete/5

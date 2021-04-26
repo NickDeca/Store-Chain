@@ -9,6 +9,7 @@ using Store_chain.HelperMethods;
 using Store_chain.Data.Managers;
 using Store_chain.Model;
 using Store_chain.Models;
+using Store_chain.Data.DTO;
 
 namespace Store_chain
 {
@@ -29,12 +30,12 @@ namespace Store_chain
             services.AddDbContext<StoreChainContext>(options =>
                     options.UseSqlServer(Configuration.GetConnectionString("Store_chainContext")));
 
-            
+
             services.AddScoped<IActionsHelper, ActionsHelper>();
 
-            services.AddTransient<IManager<Customers>, CustomerManager>();
-            services.AddTransient<IManager<Products>, ProductManager>();
-            services.AddTransient<IManager<Suppliers>, SupplierManager>();
+            services.AddTransient<IManager<Customers, CustomerEditViewDTO>, CustomerManager>();
+            services.AddTransient<IManager<Products, ProductEditViewDTO>, ProductManager>();
+            services.AddTransient<IManager<Suppliers, SupplierViewDTO>, SupplierManager>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

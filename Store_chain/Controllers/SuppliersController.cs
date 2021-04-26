@@ -9,11 +9,11 @@ using Store_chain.Model;
 
 namespace Store_chain.Controllers
 {
-    public class SuppliersController : BaseController<Suppliers>
+    public class SuppliersController : BaseController<Suppliers, SupplierViewDTO>
     {
-        private readonly IManager<Suppliers> _manager;
+        private readonly IManager<Suppliers, SupplierViewDTO> _manager;
 
-        public SuppliersController(IManager<Suppliers> manager) : base(manager)
+        public SuppliersController(IManager<Suppliers, SupplierViewDTO> manager) : base(manager)
         {
             _manager = manager;
         }
@@ -58,17 +58,6 @@ namespace Store_chain.Controllers
             }
             return View(supplierDTO);
         }
-
-        //public void ChangeDTOToFull(ref dynamic fullClass, dynamic DTO) {
-        //    if (DTO.PaymentDue != null && DTO.PaymentDue != default(decimal))
-        //        fullClass.PaymentDue = DTO.PaymentDue;
-        //    if (!string.IsNullOrEmpty(DTO.Description))
-        //        fullClass.Description = DTO.Description;
-        //    if(DTO.Category != null && DTO.Category != default(decimal))
-        //        fullClass.Category = DTO.Category;
-        //    if(!string.IsNullOrEmpty(DTO.Name))
-        //        fullClass.Name = DTO.Name;
-        //}
 
         // POST: Suppliers/Delete/5
         [HttpPost, ActionName("Delete")]

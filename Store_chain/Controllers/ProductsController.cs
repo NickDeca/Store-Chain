@@ -10,11 +10,11 @@ using Store_chain.Models;
 
 namespace Store_chain.Controllers
 {
-    public class ProductsController : BaseController<Products>
+    public class ProductsController : BaseController<Products, ProductEditViewDTO>
     {
-        private readonly IManager<Products> _manager;
+        private readonly IManager<Products, ProductEditViewDTO> _manager;
 
-        public ProductsController(IManager<Products> manager) : base(manager)
+        public ProductsController(IManager<Products, ProductEditViewDTO> manager) : base(manager)
         {
             _manager = manager;
         }

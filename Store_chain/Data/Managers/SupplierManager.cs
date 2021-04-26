@@ -3,13 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.Data.DTO;
 using Store_chain.DataLayer;
 using Store_chain.Exceptions;
 using Store_chain.Model;
 
 namespace Store_chain.Data.Managers
 {
-    public class SupplierManager : BaseManager<Suppliers>, IManager<Suppliers>
+    public class SupplierManager : BaseManager<Suppliers>, IManager<Suppliers, SupplierViewDTO>
     {
         private readonly StoreChainContext _context;
         public SupplierManager(StoreChainContext context)
@@ -34,6 +35,11 @@ namespace Store_chain.Data.Managers
         public async Task<Suppliers> FindOne(int id)
         {
             return await _context.Suppliers.FindAsync(id);
+        }
+
+        public Task<SupplierViewDTO> FindOneDTO(int value)
+        {
+            throw new NotImplementedException();
         }
 
         public bool Any(int id)

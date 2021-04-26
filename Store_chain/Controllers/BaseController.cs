@@ -7,13 +7,13 @@
     using Store_chain.HelperMethods;
     using Store_chain.Models;
 
-    public abstract class BaseController<TEntity> : Controller, IBaseController<TEntity> where TEntity : class, IBaseModel
+    public abstract class BaseController<TEntity, TModelDTO> : Controller, IBaseController<TEntity, TModelDTO> where TEntity : class, IBaseModel
     {
         //private readonly StoreChainContext _context;
         //private IActionsHelper _helper;
-        private readonly IManager<TEntity> _manager;
+        private readonly IManager<TEntity, TModelDTO> _manager;
 
-        public BaseController(IManager<TEntity> manager)//, StoreChainContext context, IActionsHelper helper)
+        public BaseController(IManager<TEntity, TModelDTO> manager)//, StoreChainContext context, IActionsHelper helper)
         {
             //_context = context;
             //_helper = helper;
@@ -53,12 +53,12 @@
                 return NotFound();
             }
 
-            var products = await _manager.FindOne(id.Value);
-            if (products == null)
+            var results = await _manager.FindOneDTO(id.Value);
+            if (results == null)
             {
                 return NotFound();
             }
-            return View(products);
+            return View(results);
         }
 
         public async Task<IActionResult> Delete(int? id)

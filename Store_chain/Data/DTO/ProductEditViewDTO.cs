@@ -7,6 +7,7 @@ namespace Store_chain.Data.DTO
 {
     public class ProductEditViewDTO
     {
+        public string Description { get; set; }
         public int SupplierKey { get; set; }
         public int Category { get; set; }
         public int Department { get; set; }

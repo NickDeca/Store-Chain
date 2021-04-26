@@ -4,7 +4,7 @@
     using Microsoft.AspNetCore.Mvc;
     using Store_chain.Models;
 
-    internal interface IBaseController<TEntity> where TEntity : class, IBaseModel
+    internal interface IBaseController<TEntity, TModelDTO> where TEntity : class, IBaseModel
     {
         Task<IActionResult> Details(int? id);
     }

@@ -6,7 +6,7 @@ using Store_chain.Models;
 
 namespace Store_chain.Data.Managers
 {
-    public interface IManager<TModel> where TModel : class, IBaseModel
+    public interface IManager<TModel, TModelDTO> where TModel : class, IBaseModel
     {
         Task<List<TModel>> BringAll();
         Task<TModel> BringOne(int id);
@@ -16,6 +16,7 @@ namespace Store_chain.Data.Managers
         Task Create(TModel model);
         Task Edit(int id, dynamic DTO);
         Task Delete(int id);
+        Task<TModelDTO> FindOneDTO(int value);
         //void ChangeDTOToFull(ref TModel fullClass, dynamic DTO);
     }
 

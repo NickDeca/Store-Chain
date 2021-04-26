@@ -7,10 +7,11 @@ using Store_chain.DataLayer;
 using Store_chain.Model;
 using Store_chain.Models;
 using Store_chain.Exceptions;
+using Store_chain.Data.DTO;
 
 namespace Store_chain.Data.Managers
 {
-    public class ProductManager : IManager<Products>
+    public class ProductManager : IManager<Products, ProductEditViewDTO>
     {
         private readonly StoreChainContext _context;
         public ProductManager(StoreChainContext context)
@@ -37,6 +38,11 @@ namespace Store_chain.Data.Managers
         public async Task<Products> FindOne(int id)
         {
             return await _context.Products.FindAsync(id);
+        }
+
+        public Task<ProductEditViewDTO> FindOneDTO(int value)
+        {
+            throw new NotImplementedException();
         }
 
         public bool Any(int id)
