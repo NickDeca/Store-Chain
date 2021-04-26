@@ -1,8 +1,10 @@
 ﻿using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Store_chain.Data.DTO;
 using Store_chain.Data.Managers;
 using Store_chain.DataLayer;
+using Store_chain.Exceptions;
 using Store_chain.Model;
 
 namespace Store_chain.Controllers
@@ -36,34 +38,37 @@ namespace Store_chain.Controllers
         // more details see http://go.microsoft.com/fwlink/?LinkId=317598.
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,PaymentDue,Category,Description,Name")] Suppliers suppliers)
+        public async Task<IActionResult> Edit(int id, SupplierViewDTO supplierDTO)//int id, [Bind("Id,PaymentDue,Category,Description,Name")] Suppliers suppliers)
         {
-            if (id != suppliers.Id)
-            {
-                return NotFound();
-            }
-
             if (ModelState.IsValid)
             {
                 try
                 {
-                    await _manager.Edit(suppliers);
+                    await _manager.Edit(id, supplierDTO);
+                }
+                catch (DbNotFoundEntityException)
+                {
+                    return NotFound();
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    if (!AnyExists(suppliers.Id))
-                    {
-                        return NotFound();
-                    }
-                    else
-                    {
-                        throw;
-                    }
+                    throw;
                 }
                 return RedirectToAction(nameof(Index));
             }
-            return View(suppliers);
+            return View(supplierDTO);
         }
+
+        //public void ChangeDTOToFull(ref dynamic fullClass, dynamic DTO) {
+        //    if (DTO.PaymentDue != null && DTO.PaymentDue != default(decimal))
+        //        fullClass.PaymentDue = DTO.PaymentDue;
+        //    if (!string.IsNullOrEmpty(DTO.Description))
+        //        fullClass.Description = DTO.Description;
+        //    if(DTO.Category != null && DTO.Category != default(decimal))
+        //        fullClass.Category = DTO.Category;
+        //    if(!string.IsNullOrEmpty(DTO.Name))
+        //        fullClass.Name = DTO.Name;
+        //}
 
         // POST: Suppliers/Delete/5
         [HttpPost, ActionName("Delete")]

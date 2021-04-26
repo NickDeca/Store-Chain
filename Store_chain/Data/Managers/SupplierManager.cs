@@ -4,11 +4,12 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Store_chain.DataLayer;
+using Store_chain.Exceptions;
 using Store_chain.Model;
 
 namespace Store_chain.Data.Managers
 {
-    public class SupplierManager : IManager<Suppliers>
+    public class SupplierManager : BaseManager<Suppliers>, IManager<Suppliers>
     {
         private readonly StoreChainContext _context;
         public SupplierManager(StoreChainContext context)
@@ -24,6 +25,10 @@ namespace Store_chain.Data.Managers
         public async Task<Suppliers> BringOne(int id)
         {
             return await _context.Suppliers.FirstOrDefaultAsync(m => m.Id == id);
+        }
+        public async Task<Suppliers> TryBringOne(int id)
+        {
+            return await _context.Suppliers.FirstOrDefaultAsync(m => m.Id == id) ?? throw new DbNotFoundEntityException();
         }
 
         public async Task<Suppliers> FindOne(int id)
@@ -41,10 +46,31 @@ namespace Store_chain.Data.Managers
             await _context.SaveChangesAsync();
         }
 
-        public async Task Edit(Suppliers supplier)
+        public async Task Edit(int id, dynamic DTO)
         {
-            _context.Update(supplier);
-            await _context.SaveChangesAsync();
+            var supplier = await TryBringOne(id);
+            try
+            {
+                ChangeDTOToFull(ref supplier, DTO);
+                _context.Update(supplier);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception err)
+            {
+                throw err;
+            }
+        }
+
+        private void ChangeDTOToFull(ref Suppliers fullClass, dynamic DTO)
+        {
+            if (DTO.PaymentDue != null && DTO.PaymentDue != default(decimal))
+                fullClass.PaymentDue = DTO.PaymentDue;
+            if (!string.IsNullOrEmpty(DTO.Description))
+                fullClass.Description = DTO.Description;
+            if (DTO.Category != null && DTO.Category != default(decimal))
+                fullClass.Category = DTO.Category;
+            if (!string.IsNullOrEmpty(DTO.Name))
+                fullClass.Name = DTO.Name;
         }
 
         public async Task Delete(int id)

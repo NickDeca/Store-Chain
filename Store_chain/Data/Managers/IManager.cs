@@ -10,11 +10,13 @@ namespace Store_chain.Data.Managers
     {
         Task<List<TModel>> BringAll();
         Task<TModel> BringOne(int id);
+        Task<TModel> TryBringOne(int id);
         Task<TModel> FindOne(int id);
         bool Any(int id);
         Task Create(TModel model);
-        Task Edit(TModel model);
+        Task Edit(int id, dynamic DTO);
         Task Delete(int id);
+        //void ChangeDTOToFull(ref TModel fullClass, dynamic DTO);
     }
 
 }
