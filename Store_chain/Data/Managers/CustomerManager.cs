@@ -10,7 +10,7 @@ using Store_chain.Model;
 
 namespace Store_chain.Data.Managers
 {
-    public class CustomerManager : IManager<Customers, CustomerEditViewDTO>
+    public class CustomerManager : /*BaseManager<Customers, CustomerEditViewDTO>,*/ IManager<Customers, CustomerEditViewDTO>
     {
         private readonly StoreChainContext _context;
         public CustomerManager(StoreChainContext context)
@@ -28,9 +28,23 @@ namespace Store_chain.Data.Managers
             return await _context.Customers.FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<Customers> TryBringOne(int id)
+        //public bool TryBringOne2(int id, ref Customers customer)
+        //{
+        //    return Task.FromResult(true); //TODO
+        //}
+
+
+        public async Task<Customers> BringOneException(int id) // try patter bool
         {
-            return await _context.Customers.FirstOrDefaultAsync(m => m.Id == id) ?? throw new DbNotFoundEntityException();
+            try
+            {
+                return await _context.Customers.SingleAsync(m => m.Id == id);
+            }
+            catch
+            {
+                throw new DbNotFoundEntityException();
+            }
+            //?? throw new DbNotFoundEntityException();
         }
 
         public async Task<Customers> FindOne(int id)
@@ -44,7 +58,7 @@ namespace Store_chain.Data.Managers
             return new CustomerEditViewDTO
             {
                 Description = concrete.Description,
-                Capital= concrete.Capital,
+                Capital = concrete.Capital,
                 FirstName = concrete.FirstName,
                 LastName = concrete.LastName
             };
@@ -68,7 +82,7 @@ namespace Store_chain.Data.Managers
 
         public async Task Edit(int id, dynamic DTO)
         {
-            var customer = await TryBringOne(id);
+            var customer = await BringOneException(id);
             try
             {
                 ChangeDTOToFull(ref customer, DTO);
@@ -84,12 +98,12 @@ namespace Store_chain.Data.Managers
 
         public async Task Delete(int id)
         {
-            var customers = await _context.Customers.FindAsync(id);
+            var customers = await _context.Customers.FindAsync(id); //TODO need null check, validation
             _context.Customers.Remove(customers);
             await _context.SaveChangesAsync();
         }
 
-        public void ChangeDTOToFull(ref Customers fullClass, CustomerEditViewDTO DTO)
+        private void ChangeDTOToFull(ref Customers fullClass, CustomerEditViewDTO DTO)
         {
             if (!string.IsNullOrEmpty(DTO.Description) && !CheckIfSame(fullClass.Description, DTO.Description))
                 fullClass.Description = DTO.Description;
@@ -104,7 +118,7 @@ namespace Store_chain.Data.Managers
                 fullClass.LastName = DTO.LastName;
         }
 
-        private bool CheckIfSame<T,TDTO>(T fullMember, TDTO DTOMember)
+        private bool CheckIfSame<T, TDTO>(T fullMember, TDTO DTOMember)
         {
             if (!typeof(T).Equals(typeof(TDTO)))
                 throw new Exception($"The type of {typeof(T)} of full class cannot be cast to {typeof(TDTO)} of DTO class");

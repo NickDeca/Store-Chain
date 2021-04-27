@@ -30,7 +30,7 @@ namespace Store_chain.Data.Managers
                 .FirstOrDefaultAsync(m => m.Id == id);
         }
 
-        public async Task<Products> TryBringOne(int id)
+        public async Task<Products> BringOneException(int id)
         {
             return await _context.Products.FirstOrDefaultAsync(m => m.Id == id) ?? throw new DbNotFoundEntityException();
         }
@@ -60,7 +60,7 @@ namespace Store_chain.Data.Managers
 
         public async Task Edit(int id, dynamic DTO)
         {
-            var product = await TryBringOne(id);
+            var product = await BringOneException(id);
             try
             {
                 ChangeDTOToFull(ref product, DTO);

@@ -10,7 +10,7 @@ using Store_chain.Model;
 
 namespace Store_chain.Data.Managers
 {
-    public class SupplierManager : BaseManager<Suppliers>, IManager<Suppliers, SupplierViewDTO>
+    public class SupplierManager : /*BaseManager<Suppliers>*/ IManager<Suppliers, SupplierViewDTO>
     {
         private readonly StoreChainContext _context;
         public SupplierManager(StoreChainContext context)
@@ -27,7 +27,7 @@ namespace Store_chain.Data.Managers
         {
             return await _context.Suppliers.FirstOrDefaultAsync(m => m.Id == id);
         }
-        public async Task<Suppliers> TryBringOne(int id)
+        public async Task<Suppliers> BringOneException(int id)
         {
             return await _context.Suppliers.FirstOrDefaultAsync(m => m.Id == id) ?? throw new DbNotFoundEntityException();
         }
@@ -54,7 +54,7 @@ namespace Store_chain.Data.Managers
 
         public async Task Edit(int id, dynamic DTO)
         {
-            var supplier = await TryBringOne(id);
+            var supplier = await BringOneException(id);
             try
             {
                 ChangeDTOToFull(ref supplier, DTO);
