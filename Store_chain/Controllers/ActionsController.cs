@@ -45,8 +45,6 @@ namespace Store_chain.Controllers
         {
             try
             {
-
-
                 var productForSupply = _context.Products.FirstOrDefault(x => x.Id == id);
 
                 if (productForSupply == null)
